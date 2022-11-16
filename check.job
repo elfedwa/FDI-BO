@@ -1,0 +1,33 @@
+
+#!/bin/bash
+
+date
+
+JOBID=`sbatch ~/HPC/run.bash  | tee  vasp_aw.log`
+JOBID=`echo $JOBID | awk {'print $4'}`
+
+echo $JOBID
+
+
+DATE_=`date '+%H:%M:%S'`
+echo "$JOBID,'Starting',$DATE_" >> ~/HPC/profiling.csv
+
+while true
+do
+
+sleep 1
+
+squeue | grep $JOBID > /dev/null
+
+if [[ $? -ne 0 ]];then
+
+        echo "job completed"
+        break;
+
+fi
+
+done
+DATE_=`date '+%H:%M:%S'`
+echo "$JOBID,'Completed',$DATE_" >> ~/HPC/profiling.csv
+date
+

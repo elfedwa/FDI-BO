@@ -1,0 +1,5 @@
+host: ds049170.mongolab.com
+port: 49170
+name: fireworks
+username: test_user
+password: testing123
