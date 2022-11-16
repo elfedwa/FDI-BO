@@ -31,5 +31,7 @@ PMG_DEFAULT_FUNCTIONAL: PBE_54
 
 PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/
 
+#Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
+
 python BOang-HT-vasp.py </dev/null >file.log 2>&1 & disown -h "$!"
 
