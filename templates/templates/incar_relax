@@ -1,0 +1,26 @@
+System = {{system}} 
+ISTART = 0 ; ICHARG=2
+ENCUT  =    400
+ISMEAR = 0; SIGMA = 0.1
+GGA = PE
+EDIFF =  0.1E-6
+EDIFFG = {{ediffg}}
+IVDW = {{ivdw}}
+ISPIN = {{ispin}}
+Nosymm
+
+#LVHAR = .TRUE.
+LCHARG = .FALSE.
+LWAVE = .FALSE.
+##LAECHG= .TRUE. #to the INCAR file, the core charge is written to AECCAR0 and the valance charge to AECCAR2
+PREC = High
+IALGO = {{ialgo}}
+#
+IBRION = {{ibrion}}               # 1: DIIS algorithm, 2: CG
+NSW = {{nsw}}   #minimisation
+LREAL= {{lreal}}
+
+ISIF = {{isif}}    
+
+#
+NPAR= {{npar}}

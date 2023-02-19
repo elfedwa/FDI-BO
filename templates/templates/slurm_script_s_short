@@ -1,0 +1,35 @@
+#!/bin/bash -l
+#SBATCH --job-name={{job_name}}
+#SBATCH --time={{job_time}}
+## Number of MPI tasks (MPI)
+#SBATCH --nodes={{nnode}} 
+#SBATCH -n {{ncpu}} 
+#SBATCH -c 1
+#SBATCH --mem-per-cpu=2000MB
+#SBATCH --no-requeue
+#SBATCH --mail-type=ALL
+#SBATCH --partition=s_short
+#SBATCH --qos=ss
+#SBATCH --gres=craynetwork:0
+ 
+##Set OMP_NUM_THREADS to the same value as -c
+##with a fallback in case it isn't set.
+##SLURM_CPUS_PER_TASK is set to the value of -c, but only if -c is explicitly set
+if [ -n "$SLURM_CPUS_PER_TASK" ]; then
+  omp_threads=$SLURM_CPUS_PER_TASK
+else
+  omp_threads=1
+fi
+export OMP_NUM_THREADS=$omp_threads
+echo "OMP_NUM_THREADS=" $omp_threads
+ 
+module use /lustre/opt/modulefiles/tamuq
+module load PrgEnv-intel/17.1.132/64bit
+module load craype
+module load cray-fftw/3.3.6.4
+
+ulimit -l 123731968
+ulimit -s 123731968
+
+VASP_BIN=/lustre/projects/Qelmellouhi/bin/vasp/
+srun --hint=nomultithread $VASP_BIN/{{cmd}} >& vasp.log

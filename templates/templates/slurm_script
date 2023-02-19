@@ -1,0 +1,30 @@
+#!/bin/bash
+##file slurm_example.sh
+# run with sbatch -o slurm-%A_%a.out slurm_example.sh
+#SBATCH --job-name={{job_name}}
+#SBATCH --output=slurm.log
+#SBATCH --nodes={{nnode}} 
+#SBATCH --ntasks={{ncpu}} 
+
+#SBATCH --time={{job_time}}
+
+##Set OMP_NUM_THREADS to the same value as -c
+##with a fallback in case it isn't set.
+##SLURM_CPUS_PER_TASK is set to the value of -c, but only if -c is explicitly set
+if [ -n "$SLURM_CPUS_PER_TASK" ]; then
+  omp_threads=$SLURM_CPUS_PER_TASK
+else
+  omp_threads=1
+fi
+export OMP_NUM_THREADS=$omp_threads
+echo "OMP_NUM_THREADS=" $omp_threads
+
+
+## To clean up the user processes once the job is completed or aborted
+if [ "$SLURM_JOB_USER" != "root" ]
+then
+   /usr/bin/pkill -9 -u $SLURM_JOB_USER -f vasp_std -e > killed_jobs.log
+fi
+
+BIN=/home/heesoo/SW/vasp.5.4.1/bin/{{cmd}}
+mpirun $BIN > vasp.log

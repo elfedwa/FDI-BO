@@ -1,0 +1,24 @@
+System = {{system}} 
+ICHARG = 1
+EDIFF = 10E-8
+ENCUT  =    520
+ISMEAR = {{ismear}}               
+SIGMA  = {{smear_sigma}}
+GGA = PE
+LORBIT=11
+#RWIGS = 1.22
+EMIN = -10
+EMAX = 10
+NEDOS = 12000 
+PREC = High
+NSW = 0 #minimisation
+IBRION=-1
+IVDW = {{ivdw}}
+ISPIN = {{ispin}}
+
+LREAL = {{lreal}}
+LWAVE = .FALSE.
+LCHARG = .TRUE.
+
+NPAR= {{npar}}
+#

@@ -1,0 +1,20 @@
+System = {{system}}
+ISTART = 0; ICHARG = 11
+EDIFF = 1.0E-7
+ENCUT  =    520
+ISMEAR = 0; SIGMA = 0.001               
+GGA = PE
+LORBIT = 11
+LWAVE = .FALSE.
+LVTOT = .FALSE.
+LCHARG = .FALSE. 
+IVDW = {{ivdw}}
+ISPIN = {{ispin}}
+
+PREC = High
+NSW = 0 #minimisation
+IBRION=-1
+LREAL = {{lreal}}
+
+NPAR = {{npar}}
+#
