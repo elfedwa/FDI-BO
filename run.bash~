@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=
+#SBATCH --job-name=$1
 #SBATCH --time=168:00:00
 #SBATCH --partition=long7
 #SBATCH --ntasks=40

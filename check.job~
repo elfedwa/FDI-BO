@@ -6,7 +6,7 @@ location="$PWD"
 echo "$location"
 parent_location="$(dirname "$location")"
 
-JOBID=`sbatch -J $1 $parent_location/run.bash | tee  vasp_aw.log`
+JOBID=`sbatch $parent_location/run.bash $1 | tee  vasp_aw.log`
 JOBID=`echo $JOBID | awk {'print $4'}`
 
 echo $JOBID

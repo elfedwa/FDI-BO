@@ -32,26 +32,12 @@ from pymatgen.analysis.structure_analyzer import VoronoiConnectivity
 import pymatgen as mg
 
 import pandas as pd
-import time
+
 # list of B or C elements in ABC3 perovskite
 Bs = ['V', 'Nb', 'Ta', 'W', 'Bi', 'V', 'Ge', 'Sn', 'Pb']
 Cs = ['O', 'S', 'Se', 'Te', 'F', 'Cl', 'Br', 'I' ]
 BCs = Bs + Cs
 
-@explicit_serialize
-class WaitTask(FiretaskBase):
-   """                                                                                                                                                                                                                                                                          
-   Set coordinations to be relaxed                                                                                                                                                                                                                                              
-   by change 'F  F  F' to 'T  T  T' in POSCAR                                                                                                                                                                                                                                   
-   """
-
-   _fw_name = "Wait Task"
-
-   def run_task(self, fw_spec):
-      sleeping=15
-      print("sleeping for sec",sleeping)
-      time.sleep(sleeping)
-       
 @explicit_serialize
 class PoscarSelTask(FiretaskBase):
    """
@@ -1335,6 +1321,8 @@ class PerovskiteAnalysis(FiretaskBase):
     def _load_params(self, d):
 
         self.concentration = d['concentration']
+        self.angle= d['angle']
+        self.dir_name=d['dir_name']
 
 
     def run_task(self, fw_spec):
@@ -1398,10 +1386,13 @@ class PerovskiteAnalysis(FiretaskBase):
         num_of_cell = list(map(int, theCell.split('x')))
         num_of_cell = num_of_cell[0] * num_of_cell[1] * num_of_cell[2]
         num_of_sites = num_of_cell * 5
+
         num_of_mainA = round(num_of_cell * (1 - systemname.subAfrac))
         num_of_subA  = round(num_of_cell * systemname.subAfrac)
-        CorrectedEnergy = entry.energy / num_of_cell  # (corrected total energy / F.U.)  from DOS
-        UncorrectedEnergy = entry.uncorrected_energy / num_of_cell # (uncooredted total energy / F.U.) from DOS  
+        # REVISION BY ABDULWAHAB: Removed num_of_cell to remove formula unit conversion in CorrectedEnergy and UncorrectedEnergy
+
+        CorrectedEnergy = entry.energy  # (corrected total energy )  from DOS
+        UncorrectedEnergy = entry.uncorrected_energy # (uncooredted total energy ) from DOS
         Correction = entry.correction
         allcomps = re.findall('[A-Z][a-z]*', systemname.comp)
         print(allcomps)
@@ -1464,27 +1455,37 @@ class PerovskiteAnalysis(FiretaskBase):
         sum_file.write(line4+'\n')
         sum_file.write(line5+'  '+'\n')
         sum_file.close()
-
+        print("TotEng",[UncorrectedEnergy])
+        print("TotEng",float(UncorrectedEnergy))
+        print("TotEng",8*((num_of_mainA)*8+(num_of_subA)*11+4))
+        total_atoms=8*((num_of_mainA/(num_of_mainA+num_of_subA))*8+(num_of_subA/(num_of_mainA+num_of_subA))*11+4)
+        print("TOTAL ATOMS",total_atoms,UncorrectedEnergy,(UncorrectedEnergy)/total_atoms)
+        # REVISION BY ABDULWAHAB: Total Atoms calculated by supercell * ((number of A1 * 8) + (number of A2 * 11) + 4 ) -> 2*2*2(A1 * 8 + A2 * 11 + 4)
+        print("Converged",[vasprun.converged])
         summary = {"Comp":[theComp], "SuperCell":[theCell],\
                    "A1":[mainA], "A2":[subA], "numA1":[num_of_mainA], "numA2":[num_of_subA],\
-                    "numAllCat": [num_of_mainA+num_of_subA], "yA2":[float(self.concentration)],\
-                   "TotEng":[UncorrectedEnergy], "Converged":[vasprun.converged],\
-                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct] }
+                    "numAllCat": [num_of_mainA+num_of_subA], "yA2":[float(self.concentration)],"yA2Actual":[num_of_subA/(num_of_mainA+num_of_subA)],"TotalAtoms":[total_atoms],\
+                   "TotEng":[UncorrectedEnergy],"TotEngperAtom": [(UncorrectedEnergy)/total_atoms],"Converged":[vasprun.converged],\
+                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct],"angle":[self.angle] }
         print(summary)
 
         print("Saving as csv...")
 
         df = pd.DataFrame(summary)
         df.index.name='index'
-        my_file = Path("../perovskites.pkl")
+        print("path to save pickle",self.dir_name+'/perovskites.pkl')
+
+        import os
+        root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
+        my_file = Path(root + '/' + self.dir_name +"/perovskites.pkl")
         if my_file.is_file():
-            df_from_file = pd.read_pickle('../perovskites.pkl')
+            df_from_file = pd.read_pickle(root + '/' + self.dir_name +"/perovskites.pkl")
             df_from_file = df_from_file.append(df, ignore_index=True)
-            pd.to_pickle(df_from_file, '../perovskites.pkl')
-            df_from_file.to_csv('../perovskites.csv')
+            pd.to_pickle(df_from_file, root + '/' + self.dir_name +"/perovskites.pkl")
+            df_from_file.to_csv(root + '/' + self.dir_name +"/perovskites.csv")
         else:
-            pd.to_pickle(df, '../perovskites.pkl')
-            df.to_csv('../perovskites.csv')
+            pd.to_pickle(df, root + '/' + self.dir_name +"/perovskites.pkl")
+            df.to_csv(root + '/' + self.dir_name +"/perovskites.csv")
 
         return FWAction(stored_data=summary, mod_spec=[])
 
@@ -1512,12 +1513,15 @@ class DeltaEMixfromPickle(FiretaskBase):
         import pandas as pd
 
         try:
-            my_file = Path("../perovskites.pkl")
-            df = pd.read_pickle('../perovskites.pkl')
+            root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
+
+            my_file = Path(root + '/' + self.dir_name +"/perovskites.pkl")
+            df = pd.read_pickle(root + '/' + self.dir_name +"/perovskites.pkl")
         except:
-            print('Cannot find perovksite.pkl datavase to calculate the enthlapy of cation mix')
+            print('Cannot find perovksite.pkl database to calculate the enthlapy of cation mix')
         
-        yA2 = self.concentration
+        # yA2 = self.concentration
+        yA2 = num_of_subA/(num_of_mainA+num_of_subA)
         print(df) 
         returntest = df['yA2'].mean()
         recentdf = df.iloc[[-1]]
@@ -1525,12 +1529,16 @@ class DeltaEMixfromPickle(FiretaskBase):
         print(recentdf) 
 
         # Energy of pure perovskites and set their minimum as the reference
-        Comp_A1 = df[(df['yA2'] < (0.0 + 1/df['numAllCat']) ) & (df['Converged']==True)]
+        # Comp_A1 = df[(df['yA2'] < (0.0 + 1/df['numAllCat']) ) & (df['Converged']==True)]
+        Comp_A1 = df[(df['yA2'] == 0.0 ) & (df['Converged']==True)]
+        """problem above """
         print("INSIDE MIXCAT, Comp_A1",Comp_A1)
         MinE_A1 = Comp_A1['TotEng'].min()
         print("INSIDE MIXCAT, MinE_A1",MinE_A1)
 
-        Comp_A2 = df[(df['yA2'] > (1.0 - 1/df['numAllCat']) ) & (df['Converged']==True)]
+        # Comp_A2 = df[(df['yA2'] > (1.0 - 1/df['numAllCat']) ) & (df['Converged']==True)]
+        Comp_A2 = df[(df['yA2']== 1.0 ) & (df['Converged']==True)]
+
         print("INSIDE MIXCAT, Comp_A2",Comp_A2)
 
         MinE_A2 = Comp_A2['TotEng'].min()

@@ -6,21 +6,24 @@ __maintainer__ = 'Heesoo Park'
 __email__ = 'heesoo.p@gmail.com'
 __date__ = 'Jul 11, 2021'
 
+import matplotlib.pyplot as plt
 from pymatgen.core.structure import Structure
 from fireworks import Firework, LaunchPad, FWorker, ScriptTask, TemplateWriterTask
 from fireworks.core.firework import Workflow
 from fireworks.core.rocket_launcher import launch_rocket, rapidfire
 from fireworks.utilities.fw_utilities import explicit_serialize
 from MixCations import SupercellPoscarTask, PoscarSelTask, PoscarSelInOrgTask, PerturbPoscarTask, MixedCationTask
-from MixCations import PerovskiteAnalysis, DeltaEMixfromPickle, WaitTask
+from MixCations import PerovskiteAnalysis, DeltaEMixfromPickle
 
-from rocketsled import MissionControl, OptTask
+# from rocketsled import MissionControl, OptTask
+from task import OptTask
+from control import MissionControl
 from fireworks.utilities.fw_utilities import explicit_serialize
 
 import random
 import sys
 random.seed()
-import time
+
 
 from fireworks import FireTaskBase, Firework, FWAction, LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
@@ -35,23 +38,12 @@ import os
 import numpy as np
 
 
+
 # list of B or C elements in ABC3 perovskite
 Bs = ['V', 'Nb', 'Ta', 'W', 'Bi', 'V', 'Ge', 'Sn', 'Pb']
 Cs = ['O', 'S', 'Se', 'Te', 'F', 'Cl', 'Br', 'I' ]
 BCs = Bs + Cs
 
-
-launchpad = LaunchPad(host="mongodb+srv://user:user@cluster0.4wrvs.mongodb.net/fireworks",uri_mode=True)
-opt_label = "opt_complex_parallel"
-db_info = {"launchpad": launchpad, "opt_label": opt_label}
-
-# Make a MissionControl object
-mc = MissionControl(**db_info)
-#   wf_creator = wf_creator
-mc.reset(hard=True)
-
-# Reset the launchpad and optimization db for this example
-launchpad.reset(password=None, require_password=False, max_reset_wo_password=2000)
 
 
 
@@ -83,13 +75,32 @@ class DeltaEMixBO(FiretaskBase):
    
     _fw_name = "MixEenergyBO Task"
 
-#   def _load_params(self, d):
+    def _load_params(self, d):
 
-#       self.concentration = d['concentration']
+        self.dir_name = d['dir_name']
+        self.mission_control = d['mission_control']
+        print("parameter_loaded",self.dir_name)
 
 
     def run_task(self, fw_spec):
+
+        if self.get("use_global_spec"):
+            self._load_params(fw_spec)
+        else:
+            self._load_params(self)
+        root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
+
         x = fw_spec["_x"]
+        if len(x)==4:
+            x = x[:-1]
+            print("now the length of x from 4 is set to 3",x)
+        if len(x)==5:
+            x = x[:-2]
+            print("now the length of x from 5 is set to 3",x)
+        if len(x)==6:
+            x = x[:-3]
+            print("now the length of x from 6 is set to 3",x)
+
         print("inside DeltaEMIXBO x",x)
         # x = x[:-1]
         # x = x[:-1] + [random.uniform(0, 1)]
@@ -103,8 +114,8 @@ class DeltaEMixBO(FiretaskBase):
         import pandas as pd
 
         try:
-            my_file = Path("../perovskites.pkl")
-            df = pd.read_pickle('../perovskites.pkl')
+            my_file = Path(root + '/' + self.dir_name +"/perovskites.pkl")
+            df = pd.read_pickle(root + '/' + self.dir_name +"/perovskites.pkl")
         except:
             print('Cannot find perovksite.pkl datavase to calculate the enthlapy of cation mix')
         
@@ -114,79 +125,65 @@ class DeltaEMixBO(FiretaskBase):
         returntest = df['yA2'].mean()
         recentdf = df.iloc[[-1]]
         print("Recent df is...")
-        print(recentdf) 
+        print(recentdf)
 
-        # Energy of pure perovskites and set their minimum as the reference
-        # Comp_A1 = df[(df['yA2']==0.0) & (df['Converged']==True)]
-        # print("Comp_A1",Comp_A1)
-        # MinE_A1 = Comp_A1['TotEng'].min()
-        # print("MinE_A1",MinE_A1)
-        #
-        # Comp_A2 = df[(df['yA2']==1.0) & (df['Converged']==True)]
-        # print("Comp_A2",Comp_A2)
-        #
-        # MinE_A2 = Comp_A2['TotEng'].min()
-        # print("MinE_A2",MinE_A2)
-        #
-        # recent_yA2 = df.at[df.index[-1],'yA2']
-        # print("recent_yA2",recent_yA2)
-        #
-        # enthalpy_mix = df.at[df.index[-1],'TotEng']
-        # print("enthalpy_mix",enthalpy_mix)
-        #
-        # enthalpy_ref = (MinE_A1 * (1.0 - yA2)) + (MinE_A2 * yA2)
-        # print("enthalpy_ref",enthalpy_ref)
-        #
-        # enthalpy_mix = (enthalpy_mix - enthalpy_ref) * 1000     # in meV/FU
-        # print("Computed Dleta H_Mix (meV/F.U.): ", enthalpy_mix)
-        #
-        # #df_Emix = df[['Comp','A1','A2','yA2','TotEng']]
-        # df_Emix = df.loc[:,('Comp','A1','A2','yA2','TotEng')]
-        # print("df_Emix", df_Emix)
-        # df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2']) - MinE_A2 * (df_Emix['yA2'])
-        # print("df_Emix['DHmix']", df_Emix['DHmix'])
-        Comp_A1 = df[(df['yA2'] < (0.0 + 1 / df['numAllCat'])) & (df['Converged'] == True)]
+
+        Comp_A1 = df[(df['yA2Actual'] == 0.0 ) & (df['Converged']==True)]
 
         print("INSIDE MIXCAT, Comp_A1", Comp_A1)
         MinE_A1 = Comp_A1['TotEng'].min()
         print("INSIDE MIXCAT, MinE_A1", MinE_A1)
 
-        Comp_A2 = df[(df['yA2'] > (1.0 - 1 / df['numAllCat'])) & (df['Converged'] == True)]
+        Comp_A2 = df[(df['yA2Actual']== 1.0 ) & (df['Converged']==True)]
         print("INSIDE MIXCAT, Comp_A2", Comp_A2)
 
         MinE_A2 = Comp_A2['TotEng'].min()
         print("INSIDE MIXCAT, MinE_A2", MinE_A2)
 
-        recent_yA2 = df.at[df.index[-1], 'yA2']
+        recent_yA2 = df.at[df.index[-1], 'yA2Actual']
         print("INSIDE MIXCAT, recent_yA2", recent_yA2)
 
         enthalpy_comp = df.at[df.index[-1], 'TotEng']
         print("INSIDE MIXCAT, enthalpy_comp", enthalpy_comp)
 
-        enthalpy_ref = (MinE_A1 * (1.0 - yA2)) + (MinE_A2 * yA2)
+        enthalpy_ref = (MinE_A1 * (1.0 - recent_yA2)) + (MinE_A2 * recent_yA2)
         print("INSIDE MIXCAT, enthalpy_ref", enthalpy_ref)
 
-        enthalpy_mix = (enthalpy_comp - enthalpy_ref) * 1000  # in eV/FU
+        enthalpy_mix = (enthalpy_comp - enthalpy_ref) * 1000  # in eV
         print("INSIDE MIXCAT, enthalpy_mix", enthalpy_mix)
 
-        print("Computed Dleta H_Mix (meV/F.U.): ", enthalpy_mix)
+        print("Computed Dleta H_Mix (meV): ", enthalpy_mix)
 
         # df_Emix = df[['Comp','A1','A2','yA2','TotEng']]
-        df_Emix = df.loc[:, ('Comp', 'A1', 'A2', 'yA2', 'TotEng')]
+        df_Emix = df.loc[:, ('Comp', 'A1', 'A2','numA1','numA2', 'yA2', 'yA2Actual','angle','TotalAtoms','TotEng','TotEngperAtom')]
         print("INSIDE MIXCAT, df_Emix", df_Emix)
-
-        df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2']) - MinE_A2 * (df_Emix['yA2'])
+        print("sanity check on df_Emix['yA2Actual'] vs ",df_Emix['yA2Actual'],yA2)
+        df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2Actual']) - MinE_A2 * (df_Emix['yA2Actual'])
         print("INSIDE MIXCAT, df_Emix['DHmix']", df_Emix['DHmix'])
 
-        df_Emix['DHmix_in_meV'] = df_Emix['DHmix'] * 1000      # in meV/FU
-        df_Emix.to_csv('../DHmix.csv')
+        df_Emix['DHmix_in_meV'] = df_Emix['DHmix'] * 1000      # in meV/
+        df_Emix['DHmix_in_meV/atom'] =  (df_Emix['DHmix'] * 1000  )/ df_Emix['TotalAtoms']      # in meV/atom
 
-        recent_DHmix = df_Emix.at[df_Emix.index[-1],'DHmix_in_meV']
+        df_Emix.to_csv(root + '/' + self.dir_name + "/DHmix.csv")
+
+        recent_DHmix = df_Emix.at[df_Emix.index[-1],'DHmix_in_meV/atom']
+        print("f_Emix['DHmix_in_meV/atom']",df_Emix['DHmix_in_meV/atom'])
+        plt.figure()
+        plt.scatter(range(len(df_Emix['DHmix_in_meV/atom'])),df_Emix['DHmix_in_meV/atom'])
+        plt.savefig(root + '/' + self.dir_name +'/liveplot.png')
+        plt.close()
         y = recent_DHmix
+        # x=x[:-2]
         print("x: ", x)
+
         print()
         print("y: ", y)
-       
+        # print("mission_control for plot",type(mission_control_to_pass))
+        #
+        # plt = mission_control_to_pass.plot()
+        # path_sv = root + '/' + self.dir_name  + "/bayesian_optimization_live.png"
+        # plt.savefig(path_sv)
+        #
         return FWAction(update_spec={"_y": y, "_x": x})
 
 
@@ -217,7 +214,12 @@ def wf_creator(x):
     BO_input = x[1]
     vc = vasp_config  # vasp_config is a global variable, set in BO-HT-vasp.py
     molalign = x[2]
-    # path_=x[3]
+    # if len(x) == 5:
+    dir_name=global_dir_name
+    db_info=global_db_info
+    mc=mission_control_to_pass
+
+    print("dir_name in global",dir_name,db_info)
 
     #BO_input = sys.argv[1]
     rfile = BO_input.split()
@@ -280,6 +282,8 @@ def wf_creator(x):
     slurm_job_name = "RunByBO"
     pbs_context = {'job_name': slurm_job_name, 'job_time': "172:00:00", 'nnode': 1, 'ncpu': 28, 'cmd': 'vasp_std' }
     firetask1 = TemplateWriterTask({'context': poscar_context, 'template_file': 'poscar_cell_shape', 'output_file': 'POSCAR'})
+    # script_to_write='~/home/Wahab005/high-throughput_wahab/MA-EA-AbdulWAhab-BATCH_VASP/./check_argument_pass.job '+global_dir_name
+    firetask1_1=ScriptTask.from_str('/home/Wahab005/high-throughput_wahab/MA-EA-AbdulWAhab-BATCH_VASP/./check_argument_pass.job '+global_dir_name)
     supercelltask = SupercellPoscarTask({'A_repeat': sc_repeat[0], 
                     'B_repeat': sc_repeat[1], 'C_repeat': sc_repeat[2], 'compound': compound })
     
@@ -295,23 +299,30 @@ def wf_creator(x):
     orgmoltask = MixedCationTask({'remove_atom': specie_to_remove, 'organic_mol': organic_cation,
                        'angle': molalign, 'axis': [1, 1, 1],
                        'center': [0., 0., 0.]})
+    runvaspcal = "mpirun /home/Wahab005/SW/vasp.5.4.1/bin/vasp_std > vasp.log"
 
-    #runvaspcal = "sbatch ~/HPC/run.bash  > vasp_aw.log"
-    #firetask6 = ScriptTask.from_str(runvaspcal)
-    #start_time=time.time()
-    firetask6=ScriptTask.from_str('~/HPC/./check.job')
-    #end_time=time.time()
-    #process_name=
+    # runvaspcal = "srun /lustre/software/vasp/vasp5/vasp.5.4.4.pl2/bin/vasp_std > vasp.log"
+    # firetask6_5=ScriptTask.from_str('module unload PrgEnv-intel/6.0.9')
+    # firetask6_6=ScriptTask.from_str('module load  PrgEnv-cray/6.0.9')
+    # firetask6_7=ScriptTask.from_str('module load vasp/vasp5/5.4')
+    # firetask6_8=ScriptTask.from_str('ulimit -s unlimited')
+    # firetask6 = ScriptTask.from_str(runvaspcal)
+    firetask6=ScriptTask.from_str('/cray_home/awahab/MA-EA-AbdulWAhab-BATCH_VASP_2/./check.job '+ global_dir_name)
     firetask7 = ScriptTask.from_str('pwd > where.txt')
-    #time_delay_firetask = WaitTask()
 
-    firetask_analysis = PerovskiteAnalysis({'concentration':concentration})
+    firetask_analysis = PerovskiteAnalysis({'concentration':concentration,'angle':molalign,'dir_name':dir_name})
     # firetask_analysis = PerovskiteAnalysis({'concentration':concentration})
 
 ####################################################################################
+    # fw1 = Firework([firetask1, supercelltask,# perturbtask,
+    #     postask, firetask2, firetask3, firetask5, orgmoltask,
+    #     firetask6_5,firetask6_6,firetask6_7,firetask6_8,firetask6, firetask7,
+    #     firetask_analysis], spec={"_x": x},
+    #    #firetask_analysis], spec={"_pass_job_info": True},
+    #     name="VASP compuation")
     fw1 = Firework([firetask1, supercelltask,# perturbtask,
         postask, firetask2, firetask3, firetask5, orgmoltask,
-        firetask6, firetask7,#time_delay_firetask,
+       firetask6, firetask7,
         firetask_analysis], spec={"_x": x},
        #firetask_analysis], spec={"_pass_job_info": True},
         name="VASP compuation")
@@ -319,7 +330,7 @@ def wf_creator(x):
 
 ###############################################################################################
     #dEmixtask = DeltaEMixBO({'concentration':concentration})
-    dEmixtask = DeltaEMixBO()
+    dEmixtask = DeltaEMixBO({'dir_name':dir_name,'mission_control':mc})
     fw2 = Firework([dEmixtask],
                   name="Compute_dEmix", spec={"_x": x})
    
@@ -332,13 +343,34 @@ def wf_creator(x):
 
 
 
-def RunBO(mc_config, numbatch, VC,batch_size,molalign=0.0):
+def RunBO(mc_config, numbatch, VC,batch_size,dir_name,molalign=0.0):
     # Configure the optimization db with MissionControl
+    launchpad = LaunchPad(host="mongodb+srv://user:user@cluster0.ahbrsyi.mongodb.net/" +dir_name, uri_mode=True)
+    # launchpad = LaunchPad(name="rsled")
+
+    opt_label = "opt_complex"
+    global global_db_info
+
+    global_db_info = {"launchpad": launchpad, "opt_label": opt_label}
+    db_info=global_db_info
+
+    # Make a MissionControl object
+    mc = MissionControl(**db_info)
+    #   wf_creator = wf_creator
+    mc.reset(hard=True)
+    global mission_control_to_pass
+    mission_control_to_pass = mc
+
+    # Reset the launchpad and optimization db for this example
+    launchpad.reset(password=None, require_password=False, max_reset_wo_password=2000)
+
     x_dim = mc_config['x_dim']
     acq = mc_config['acq']
     predictor = mc_config['predictor']
     maximize = mc_config['maximize']
+    global global_dir_name
     batch_size=batch_size
+    global_dir_name = dir_name
     global vasp_config   # Sets up the VASP input
     vasp_config = VC
 
@@ -349,7 +381,8 @@ def RunBO(mc_config, numbatch, VC,batch_size,molalign=0.0):
         predictor=predictor,
         maximize=maximize,
         batch_size=batch_size,
-        enforce_sequential=True,
+        dir_name=global_dir_name
+
 
     )
 
@@ -357,7 +390,7 @@ def RunBO(mc_config, numbatch, VC,batch_size,molalign=0.0):
     concentration = x_dim[0]
     print("concentration",concentration)
     BO_input = x_dim[1][0]
-    
+    print("BO_input",x_dim[1][0])
     # This below line sets the input for BO instead of reading atoms.inp file    
     #BO_input = sys.argv[1]
     rfile = BO_input.split()
@@ -390,21 +423,29 @@ def RunBO(mc_config, numbatch, VC,batch_size,molalign=0.0):
     if batch_size>1:
         for bs in range(batch_size):
             print("bs",bs)
-            if bs != 0:
-                print("bs not equal to 0",bs)
-                launchpad.add_wf(wf_creator([random.random(), BO_input, random.random()]))
-            else:
-                print("bs equal to 0", bs)
-                launchpad.add_wf(wf_creator([concentration, BO_input, random.random()]))
+            launchpad.add_wf(wf_creator([concentration, BO_input, random.random(),dir_name,db_info,mc]))
     else:
-        launchpad.add_wf(wf_creator([concentration, BO_input, molalign]))
+        launchpad.add_wf(wf_creator([concentration, BO_input, molalign,dir_name,db_info,mc]))
 
     print("NUMBER OF LAUNCHES THAT WIll HAPPeN IS",numbatch,batch_size)
-    #rapidfire(launchpad, nlaunches=(numbatch*batch_size*3), sleep_time=0)
+    print("TESTING TRUTH CONDITION",str(dir_name.split('_')[0]) , 'FDI-BO', 'FDI-BO'==str(dir_name.split('_')[0]))
+    if str(dir_name.split('_')[0]) == 'FDI-BO':
+        print("launching multiprocess",dir_name.split('_')[0],batch_size,numbatch)
 
-    launch_multiprocess(launchpad,FWorker(),nlaunches=(numbatch*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
+        launch_multiprocess(launchpad,FWorker(),nlaunches=(numbatch*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
+    elif str(dir_name.split('_')[0]) == 'TOPK-BO':
+        print("launching multiprocess",dir_name.split('_')[0],batch_size,numbatch)
+
+        launch_multiprocess(launchpad,FWorker(),nlaunches=(numbatch*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
+    else:
+        print("launching single",dir_name.split('_')[0],batch_size,numbatch)
+
+        rapidfire(launchpad, nlaunches=(numbatch * batch_size * 3), sleep_time=0)
 
     # Examine and plot the optimization
     plt = mc.plot(print_pareto=True)
 #   plt.show()
-    plt.savefig("bayesian_optimization.pdf")
+    import os
+    root = os.getcwd()
+    path_sv = root + '/' + dir_name + "/bayesian_optimization.pdf"
+    plt.savefig(path_sv)

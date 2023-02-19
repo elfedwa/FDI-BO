@@ -66,7 +66,7 @@ if __name__ == "__main__":
         predictor = "GaussianProcessRegressor"
         print("selected batch_size and BO_num_batches and predictor", str(sys.argv[1]), batch_size, BO_num_batches, predictor)
     elif str(sys.argv[1]) == 'S-BO' or str(sys.argv[1]) == 'random':
-        BO_num_batches = 100
+        BO_num_batches = 200
         batch_size = 1
         if sys.argv[1] == 'random':
             predictor = "random"
