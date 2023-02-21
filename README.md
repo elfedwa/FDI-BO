@@ -25,6 +25,8 @@ copy paste fireworks template writer files to current fireworks directory
 
 copy paste POTCAR FOLDER -> /cray_home/user_name/vasp_potcar/MY_PSP
 
+copy paste templates to 
+
 gedit ~/.pmgrc.yaml
 
 #Add these lines:
