@@ -10,7 +10,9 @@ rocketsled is part of this code so no need to install it. Configure HPC as below
 `conda config --append channels conda-forge`
 
 `conda activate fdibo_env`
+
 ![image info](img/bo_loop.png)
+
 copy/paste fireworks template writer files to current fireworks directory
 
 copy paste POTCAR FOLDER -> `/cray_home/user_name/vasp_potcar/MY_PSP`
