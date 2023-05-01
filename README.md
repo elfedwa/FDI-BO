@@ -12,35 +12,23 @@ This is the new code. Rocketsled is part of this code so no need to install it. 
 
 `conda activate fdibo_env`
 
+copy/paste fireworks template writer files to current fireworks directory
 
-#Installing right packages in following order
+copy paste POTCAR FOLDER -> `/cray_home/user_name/vasp_potcar/MY_PSP`
 
+copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templates`
 
-pip install pymatgen
-
-pip install numpy
-
-pip install pymongo
-
-pip install dnspython
-
-copy paste fireworks template writer files to current fireworks directory
-
-copy paste POTCAR FOLDER -> /cray_home/user_name/vasp_potcar/MY_PSP
-
-copy paste templates to 
-
-gedit ~/.pmgrc.yaml
+`gedit ~/.pmgrc.yaml`
 
 #Add these lines:
 
-PMG_DEFAULT_FUNCTIONAL: PBE_54
+`PMG_DEFAULT_FUNCTIONAL: PBE_54`
 
-PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/
+`PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
 
 #Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
 
-python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"
+`python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
 
 available methods are : FDI-BO
                        TOPK-BO
