@@ -1,5 +1,10 @@
 # Faux data Injection Bayesian Optimization
 
+Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
+
+![image info](img/bo_loop.png)
+
+To install the required python packages run: 
 
 `pip install -r requirements.txt`
 
@@ -11,7 +16,6 @@ rocketsled is part of this code so no need to install it. Configure HPC as below
 
 `conda activate fdibo_env`
 
-![image info](img/bo_loop.png)
 
 copy/paste fireworks template writer files to current fireworks directory
 
