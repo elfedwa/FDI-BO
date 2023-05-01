@@ -1,5 +1,8 @@
 # FDIBO
-Faux data Injection BO
+Faux data Injection Bayesian Optimization
+
+`pip install -r requirements.txt`
+
 
 This is the new code. Rocketsled is part of this code so no need to install it. Install Firework and Pymatgen as before. Configure HPC as below:
 
