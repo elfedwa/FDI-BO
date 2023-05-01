@@ -1,0 +1,13 @@
+astropy==5.2.2
+FireWorks==1.9.5
+GPy==1.12.0
+joblib==0.13.2
+matplotlib==3.3.4
+numpy==1.19.5
+pandas==1.1.5
+pymatgen==2021.2.8.1
+rocketsled==1.0.1.20200523
+ruamel.base==1.0.0
+scikit_learn==1.2.2
+scipy==1.5.4
+tqdm==4.62.3
