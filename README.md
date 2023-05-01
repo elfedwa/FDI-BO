@@ -1,16 +1,16 @@
-# FDIBO
-Faux data Injection Bayesian Optimization
+# Faux data Injection Bayesian Optimization
+
 
 `pip install -r requirements.txt`
 
 
-This is the new code. Rocketsled is part of this code so no need to install it. Install Firework and Pymatgen as before. Configure HPC as below:
+This is the new code. Rocketsled is part of this code so no need to install it. Configure HPC as below:
 
-conda create -n rocketsled_env python==3.6
+`conda create -n fdibo_env python==3.6`
 
-conda config --append channels conda-forge
+`conda config --append channels conda-forge`
 
-conda activate rocketsled_env
+`conda activate fdibo_env`
 
 
 #Installing right packages in following order
