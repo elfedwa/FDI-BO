@@ -8,7 +8,11 @@ To install the required python packages run:
 
 `pip install -r requirements.txt`
 
-rocketsled is part of this code so no need to install it. Configure HPC as below:
+rocketsled is part of this code so no need to install it. Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
+
+`export VASP_PATH='lustre/software/vasp/vasp.5.4.4.pl2/bin/'`
+
+create conda virtural environment as below:
 
 `conda create -n fdibo_env python==3.6`
 
