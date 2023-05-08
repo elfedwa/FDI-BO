@@ -23,7 +23,7 @@ create conda virtural environment as below:
 `conda config --append channels conda-forge`
 
 `conda activate fdibo_env`
-### Installation
+<a name="general-info"></a>
 
 copy/paste fireworks template writer files to current fireworks directory
 
