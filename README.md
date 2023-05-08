@@ -4,7 +4,7 @@ Bayesian optimization with Faux-data injection loop is illustrated in the figure
 
 ![image info](img/bo_loop.png)
 
-1. [Installation]
+1. [Installation](#general-info)
 
 To install the required python packages run: 
 
