@@ -1,20 +1,28 @@
 ## Faux data Injection Bayesian Optimization
 ## Table of Contents
-Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
 
-![image info](img/bo_loop.png)
 
 1. [Overview](#overview)
 2. [Installation](#installation)
 3. [Environment Setup](#env)
-3. [Command-Line](#cmd)
+3. [Command-Line Execution](#cmd)
 
+##Overview
+<a name="overview"></a>
+Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
+
+![image info](img/bo_loop.png)
+
+##Installation
+<a name="installation"></a>
 To install the required python packages run: 
 
 `pip install -r requirements.txt`
 
 Rocketsled is part of this code so no need to install it. 
 
+##Environment Setup
+<a name="env"></a>
 Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
 
 `export VASP_PATH='lustre/software/vasp/vasp.5.4.4.pl2/bin/'`
@@ -42,7 +50,9 @@ copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templa
 
 `PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
 
-#Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
+##Command-Line Execution 
+<a name="cmd"></a>
+Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
 
 `python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
 
