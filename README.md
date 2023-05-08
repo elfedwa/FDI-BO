@@ -6,6 +6,8 @@
 2. [Installation](#installation)
 3. [Environment Setup](#env)
 3. [Command-Line Execution](#cmd)
+4. [Citation](#cite)
+
 
 ## Overview
 <a name="overview"></a>
@@ -60,3 +62,15 @@ available methods are : **FDI-BO**,
                        **TOPK-BO**,
                        **S-BO**,
                        **random** 
+                       
+## Citation 
+<a name="cite"></a>
+Please cite this work as:
+
+`@article{faux2023
+  title={Faux-Data Injection Optimization for Accelerating
+   Data-Driven Discovery of Materials},
+  author={Wahab, Abdul and Chawla, Sanjay and El-Mellouhi, Fedwa},
+  journal={Integrating Materials and Manufacturing Innovation},
+  publisher={Springer}
+}`
