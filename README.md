@@ -7,13 +7,13 @@
 3. [Environment Setup](#env)
 3. [Command-Line Execution](#cmd)
 
-##Overview
+## Overview
 <a name="overview"></a>
 Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
 
 ![image info](img/bo_loop.png)
 
-##Installation
+## Installation
 <a name="installation"></a>
 To install the required python packages run: 
 
@@ -21,7 +21,7 @@ To install the required python packages run:
 
 Rocketsled is part of this code so no need to install it. 
 
-##Environment Setup
+## Environment Setup
 <a name="env"></a>
 Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
 
@@ -50,7 +50,7 @@ copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templa
 
 `PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
 
-##Command-Line Execution 
+## Command-Line Execution 
 <a name="cmd"></a>
 Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
 
