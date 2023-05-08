@@ -1,14 +1,18 @@
-# Faux data Injection Bayesian Optimization
+## Faux data Injection Bayesian Optimization
 
 Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
 
 ![image info](img/bo_loop.png)
 
+1. [Installation]
+
 To install the required python packages run: 
 
 `pip install -r requirements.txt`
 
-rocketsled is part of this code so no need to install it. Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
+Rocketsled is part of this code so no need to install it. 
+
+Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
 
 `export VASP_PATH='lustre/software/vasp/vasp.5.4.4.pl2/bin/'`
 
