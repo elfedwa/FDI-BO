@@ -67,10 +67,10 @@ available methods are : **FDI-BO**,
 <a name="cite"></a>
 Please cite this work as:
 
-`@article{faux2023
+<pre>@article{faux2023
   title={Faux-Data Injection Optimization for Accelerating
    Data-Driven Discovery of Materials},
   author={Ziaullah, Abdul Wahab and Chawla, Sanjay and El-Mellouhi, Fedwa},
   journal={Integrating Materials and Manufacturing Innovation},
   publisher={Springer}
-}`
+}</pre>
