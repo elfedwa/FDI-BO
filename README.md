@@ -1,5 +1,5 @@
 ## Faux data Injection Bayesian Optimization
-
+## Table of Contents
 Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
 
 ![image info](img/bo_loop.png)
@@ -23,7 +23,7 @@ create conda virtural environment as below:
 `conda config --append channels conda-forge`
 
 `conda activate fdibo_env`
-
+### Installation
 
 copy/paste fireworks template writer files to current fireworks directory
 
