@@ -70,7 +70,7 @@ Please cite this work as:
 `@article{faux2023
   title={Faux-Data Injection Optimization for Accelerating
    Data-Driven Discovery of Materials},
-  author={Wahab, Abdul and Chawla, Sanjay and El-Mellouhi, Fedwa},
+  author={Ziaullah, Abdul Wahab and Chawla, Sanjay and El-Mellouhi, Fedwa},
   journal={Integrating Materials and Manufacturing Innovation},
   publisher={Springer}
 }`
