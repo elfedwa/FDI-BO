@@ -56,7 +56,7 @@ Run in login-node using this which will automatically submit job to compute node
 
 `python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
 
-available methods are : FDI-BO
-                       TOPK-BO
-                       S-BO
-                       random
+available methods are : **FDI-BO**
+                       **TOPK-BO**
+                       **S-BO**
+                       **random**
