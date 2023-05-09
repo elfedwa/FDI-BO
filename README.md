@@ -5,7 +5,7 @@
 1. [Overview](#overview)
 2. [Installation](#installation)
 3. [Environment Setup](#env)
-3. [Command-Line Execution](#cmd)
+3. [Execution](#exe)
 4. [Citation](#cite)
 
 
@@ -52,16 +52,19 @@ copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templa
 
 `PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
 
-## Command-Line Execution 
-<a name="cmd"></a>
-Run in login-node using this which will automatically submit job to compute node. the terminal can be closed and the job will remain active with disown -h
-
-`python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
-
-available methods are : **FDI-BO**, 
+## Execution 
+<a name="exe"></a>
+The computational experiment is initialized in  `atoms.inp`. So to run computations on  Methylammonium lead halide change with supercell size of `2x2x2` and lattice parameters of `6.30x6.30x6.30` , and initial concentration of `0.275` we add the correseponding line:
+<pre>
+ 6.30 6.30 6.30    Methylammonium   Pb I  I      2 2 2  Ethylammonium    0.275
+</pre>
+The computational experiments can be executed by running the following command-line, replacing (method) with either **FDI-BO**, 
                        **TOPK-BO**,
                        **S-BO**,
                        **random** 
+
+`python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
+
                        
 ## Citation 
 <a name="cite"></a>
