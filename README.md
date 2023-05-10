@@ -60,7 +60,7 @@ The computational experiment is initialized in  `atoms.inp`. So to run computati
 </pre>
 The computational experiments can be executed by running the following command-line, replacing (method) with either **FDI-BO**, 
                        **TOPK-BO**,
-                       **S-BO**,
+                       **S-BO** or
                        **random** 
 
 `python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`

@@ -1,10 +1,10 @@
 
-__author__ = 'Heesoo Park'
+__author__ = 'Heesoo Park , Abdul Wahab Ziaullah'
 __copyright__ = 'Copyright ---------------------------'
-__version__ = '0.2'
+__version__ = '2'
 __maintainer__ = 'Heesoo Park'
 __email__ = 'heesoo.p@gmail.com'
-__date__ = 'Jul 11, 2021'
+__date__ = 'May 30, 2023'
 
 import matplotlib.pyplot as plt
 from pymatgen.core.structure import Structure
@@ -93,22 +93,10 @@ class DeltaEMixBO(FiretaskBase):
         x = fw_spec["_x"]
         if len(x)==4:
             x = x[:-1]
-            print("now the length of x from 4 is set to 3",x)
         if len(x)==5:
             x = x[:-2]
-            print("now the length of x from 5 is set to 3",x)
         if len(x)==6:
             x = x[:-3]
-            print("now the length of x from 6 is set to 3",x)
-
-        print("inside DeltaEMIXBO x",x)
-        # x = x[:-1]
-        # x = x[:-1] + [random.uniform(0, 1)]
-
-        #       if self.get("use_global_spec"):
-#           self._load_params(fw_spec)
-#       else:
-#           self._load_params(self)
 
         from pathlib import Path
         import pandas as pd
@@ -119,10 +107,8 @@ class DeltaEMixBO(FiretaskBase):
         except:
             print('Cannot find perovksite.pkl datavase to calculate the enthlapy of cation mix')
         
-       #yA2 = self.concentration
         yA2 = x[0]
         print(df) 
-        returntest = df['yA2'].mean()
         recentdf = df.iloc[[-1]]
         print("Recent df is...")
         print(recentdf)
@@ -130,60 +116,26 @@ class DeltaEMixBO(FiretaskBase):
 
         Comp_A1 = df[(df['yA2Actual'] == 0.0 ) & (df['Converged']==True)]
 
-        print("INSIDE MIXCAT, Comp_A1", Comp_A1)
         MinE_A1 = Comp_A1['TotEng'].min()
-        print("INSIDE MIXCAT, MinE_A1", MinE_A1)
-
         Comp_A2 = df[(df['yA2Actual']== 1.0 ) & (df['Converged']==True)]
-        print("INSIDE MIXCAT, Comp_A2", Comp_A2)
-
         MinE_A2 = Comp_A2['TotEng'].min()
-        print("INSIDE MIXCAT, MinE_A2", MinE_A2)
-
         recent_yA2 = df.at[df.index[-1], 'yA2Actual']
-        print("INSIDE MIXCAT, recent_yA2", recent_yA2)
-
         enthalpy_comp = df.at[df.index[-1], 'TotEng']
-        print("INSIDE MIXCAT, enthalpy_comp", enthalpy_comp)
-
         enthalpy_ref = (MinE_A1 * (1.0 - recent_yA2)) + (MinE_A2 * recent_yA2)
-        print("INSIDE MIXCAT, enthalpy_ref", enthalpy_ref)
-
         enthalpy_mix = (enthalpy_comp - enthalpy_ref) * 1000  # in eV
-        print("INSIDE MIXCAT, enthalpy_mix", enthalpy_mix)
-
-        print("Computed Dleta H_Mix (meV): ", enthalpy_mix)
-
-        # df_Emix = df[['Comp','A1','A2','yA2','TotEng']]
         df_Emix = df.loc[:, ('Comp', 'A1', 'A2','numA1','numA2', 'yA2', 'yA2Actual','angle','TotalAtoms','TotEng','TotEngperAtom')]
-        print("INSIDE MIXCAT, df_Emix", df_Emix)
-        print("sanity check on df_Emix['yA2Actual'] vs ",df_Emix['yA2Actual'],yA2)
         df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2Actual']) - MinE_A2 * (df_Emix['yA2Actual'])
-        print("INSIDE MIXCAT, df_Emix['DHmix']", df_Emix['DHmix'])
-
         df_Emix['DHmix_in_meV'] = df_Emix['DHmix'] * 1000      # in meV/
         df_Emix['DHmix_in_meV/atom'] =  (df_Emix['DHmix'] * 1000  )/ df_Emix['TotalAtoms']      # in meV/atom
-
         df_Emix.to_csv(root + '/' + self.dir_name + "/DHmix.csv")
-
         recent_DHmix = df_Emix.at[df_Emix.index[-1],'DHmix_in_meV/atom']
-        print("f_Emix['DHmix_in_meV/atom']",df_Emix['DHmix_in_meV/atom'])
         plt.figure()
         plt.scatter(range(len(df_Emix['DHmix_in_meV/atom'])),df_Emix['DHmix_in_meV/atom'])
         plt.savefig(root + '/' + self.dir_name +'/liveplot.png')
         plt.close()
         y = recent_DHmix
-        # x=x[:-2]
         print("x: ", x)
-
-        print()
         print("y: ", y)
-        # print("mission_control for plot",type(mission_control_to_pass))
-        #
-        # plt = mission_control_to_pass.plot()
-        # path_sv = root + '/' + self.dir_name  + "/bayesian_optimization_live.png"
-        # plt.savefig(path_sv)
-        #
         return FWAction(update_spec={"_y": y, "_x": x})
 
 
@@ -214,14 +166,9 @@ def wf_creator(x):
     BO_input = x[1]
     vc = vasp_config  # vasp_config is a global variable, set in BO-HT-vasp.py
     molalign = x[2]
-    # if len(x) == 5:
     dir_name=global_dir_name
     db_info=global_db_info
     mc=mission_control_to_pass
-
-    print("dir_name in global",dir_name,db_info)
-
-    #BO_input = sys.argv[1]
     rfile = BO_input.split()
     lattices = rfile[0:3]
     lattices = list(map(float, lattices))
@@ -229,6 +176,7 @@ def wf_creator(x):
     supercell_repeat = rfile[7:10]
     supercell_repeat = list(map(int, supercell_repeat))
     cation_site = atoms[0]
+
     ## Random/BO in atoms.inp: the concetration values are given by the workflow
     if (atoms[5] == "Random") or (atoms[5] == "BO"):
         concentration = x1
@@ -237,16 +185,11 @@ def wf_creator(x):
         concentration_inp = float(atoms[5])
         print("In the atoms.inp, {} is given as the concentration of A2".format(concentration_inp))
         print("The BO method will not use this concentration. But the BO-generated concentration will be used.")
-       #organic_molecule_to_add = atoms[0:5:4] + [concentration]
         concentration = x1
         organic_molecule_to_add = atoms[0:5:4] + [concentration]
-        print("ORGANIC MOLECULE TO ADD",organic_molecule_to_add)
     # Cs will be replaced with the organic molecule later. And Cs's coordinates are the center of the molecule.
     atoms[0] = cell_with_Cs(atoms[0])
-    print("atoms[0] = cell_with_Cs(atoms[0]) ",atoms[0],cell_with_Cs(atoms[0]) )
     atoms[4] = cell_with_Cs(atoms[4])
-    print("atoms[4] = cell_with_Cs(atoms[4]) ",atoms[4],cell_with_Cs(atoms[4]) )
-
     print('Input lattices, element, and supercell repetition: {}, {}, and {}'\
            .format(lattices, atoms, supercell_repeat))
     print('Cations to be mixed: ', organic_molecule_to_add)
@@ -260,7 +203,6 @@ def wf_creator(x):
     organic_cation = vaspinp['organic_cation']
     supercell_repeat = vaspinp['supercell_repeat']
     concentration = x[0]
-
     pi = 3.1415926535 # the ratio of a circle's circumference to its diameter
     specie_to_remove = ['Cs']
 
@@ -268,10 +210,6 @@ def wf_creator(x):
     compound = '{}{}{}2{}_{}x{}x{}_{}{}'.format(SN[organic_cation[0]], atoms[1], atoms[2], atoms[3], 
                sc_repeat[0], sc_repeat[1], sc_repeat[2], SN[organic_cation[1]], concentration)
 
-    print("CONCENTRATION IN POSCAR",concentration)
-    print("CONCENTRATION IN POSCAR",concentration)
-    print("CONCENTRATION IN POSCAR",concentration)
-    print("CONCENTRATION IN POSCAR",concentration)
 
     poscar_context = {'system': compound,
                     'lattice_A': lattices[0], 'lattice_B': lattices[1], 'lattice_C': lattices[2],
@@ -282,9 +220,7 @@ def wf_creator(x):
     slurm_job_name = "RunByBO"
     pbs_context = {'job_name': slurm_job_name, 'job_time': "172:00:00", 'nnode': 1, 'ncpu': 28, 'cmd': 'vasp_std' }
     firetask1 = TemplateWriterTask({'context': poscar_context, 'template_file': 'poscar_cell_shape', 'output_file': 'POSCAR'})
-    # script_to_write='~/home/Wahab005/high-throughput_wahab/MA-EA-AbdulWAhab-BATCH_VASP/./check_argument_pass.job '+global_dir_name
-    firetask1_1=ScriptTask.from_str('/home/Wahab005/high-throughput_wahab/MA-EA-AbdulWAhab-BATCH_VASP/./check_argument_pass.job '+global_dir_name)
-    supercelltask = SupercellPoscarTask({'A_repeat': sc_repeat[0], 
+    supercelltask = SupercellPoscarTask({'A_repeat': sc_repeat[0],
                     'B_repeat': sc_repeat[1], 'C_repeat': sc_repeat[2], 'compound': compound })
     
     postask = PoscarSelInOrgTask()    # Selective dynamics F F F for inorganic frame
@@ -299,37 +235,23 @@ def wf_creator(x):
     orgmoltask = MixedCationTask({'remove_atom': specie_to_remove, 'organic_mol': organic_cation,
                        'angle': molalign, 'axis': [1, 1, 1],
                        'center': [0., 0., 0.]})
-    runvaspcal = "mpirun /home/Wahab005/SW/vasp.5.4.1/bin/vasp_std > vasp.log"
-
-    # runvaspcal = "srun /lustre/software/vasp/vasp5/vasp.5.4.4.pl2/bin/vasp_std > vasp.log"
-    # firetask6_5=ScriptTask.from_str('module unload PrgEnv-intel/6.0.9')
-    # firetask6_6=ScriptTask.from_str('module load  PrgEnv-cray/6.0.9')
-    # firetask6_7=ScriptTask.from_str('module load vasp/vasp5/5.4')
-    # firetask6_8=ScriptTask.from_str('ulimit -s unlimited')
-    # firetask6 = ScriptTask.from_str(runvaspcal)
-    firetask6=ScriptTask.from_str('/cray_home/awahab/MA-EA-AbdulWAhab-BATCH_VASP_2/./check.job '+ global_dir_name)
+    root = os.getcwd()
+    if "launcher" in root:
+        root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
+    firetask6=ScriptTask.from_str(root+'./check.job '+ global_dir_name)
     firetask7 = ScriptTask.from_str('pwd > where.txt')
-
     firetask_analysis = PerovskiteAnalysis({'concentration':concentration,'angle':molalign,'dir_name':dir_name})
-    # firetask_analysis = PerovskiteAnalysis({'concentration':concentration})
 
 ####################################################################################
-    # fw1 = Firework([firetask1, supercelltask,# perturbtask,
-    #     postask, firetask2, firetask3, firetask5, orgmoltask,
-    #     firetask6_5,firetask6_6,firetask6_7,firetask6_8,firetask6, firetask7,
-    #     firetask_analysis], spec={"_x": x},
-    #    #firetask_analysis], spec={"_pass_job_info": True},
-    #     name="VASP compuation")
+
     fw1 = Firework([firetask1, supercelltask,# perturbtask,
         postask, firetask2, firetask3, firetask5, orgmoltask,
        firetask6, firetask7,
         firetask_analysis], spec={"_x": x},
-       #firetask_analysis], spec={"_pass_job_info": True},
         name="VASP compuation")
 ########################################################################################
 
 ###############################################################################################
-    #dEmixtask = DeltaEMixBO({'concentration':concentration})
     dEmixtask = DeltaEMixBO({'dir_name':dir_name,'mission_control':mc})
     fw2 = Firework([dEmixtask],
                   name="Compute_dEmix", spec={"_x": x})
@@ -392,7 +314,6 @@ def RunBO(mc_config, numbatch, VC,batch_size,dir_name,molalign=0.0):
     BO_input = x_dim[1][0]
     print("BO_input",x_dim[1][0])
     # This below line sets the input for BO instead of reading atoms.inp file    
-    #BO_input = sys.argv[1]
     rfile = BO_input.split()
     lattices = rfile[0:3]
     lattices = list(map(float, lattices))

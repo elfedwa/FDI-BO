@@ -1325,6 +1325,7 @@ class PerovskiteAnalysis(FiretaskBase):
         self.dir_name=d['dir_name']
 
 
+
     def run_task(self, fw_spec):
         from pathlib import Path
 
@@ -1462,11 +1463,12 @@ class PerovskiteAnalysis(FiretaskBase):
         print("TOTAL ATOMS",total_atoms,UncorrectedEnergy,(UncorrectedEnergy)/total_atoms)
         # REVISION BY ABDULWAHAB: Total Atoms calculated by supercell * ((number of A1 * 8) + (number of A2 * 11) + 4 ) -> 2*2*2(A1 * 8 + A2 * 11 + 4)
         print("Converged",[vasprun.converged])
+        working_directory=os.getcwd()
         summary = {"Comp":[theComp], "SuperCell":[theCell],\
                    "A1":[mainA], "A2":[subA], "numA1":[num_of_mainA], "numA2":[num_of_subA],\
                     "numAllCat": [num_of_mainA+num_of_subA], "yA2":[float(self.concentration)],"yA2Actual":[num_of_subA/(num_of_mainA+num_of_subA)],"TotalAtoms":[total_atoms],\
-                   "TotEng":[UncorrectedEnergy],"TotEngperAtom": [(UncorrectedEnergy)/total_atoms],"Converged":[vasprun.converged],\
-                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct],"angle":[self.angle] }
+                   "TotEng":[UncorrectedEnergy],"Converged":[vasprun.converged],\
+                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct],"angle":[self.angle],"working_directory":[working_directory],"material_id":[str(theComp)+"_"+str(theCell)+"_"+str(mainA)+"_"+str(num_of_subA/(num_of_mainA+num_of_subA))+"_"+str(total_atoms)+"_"+str(lambda_oct)+"_"+str(sigma_oct)+"_"+str(phi_oct)+"_"+str(self.angle)],"TotEngperAtom": [(UncorrectedEnergy)/total_atoms] }
         print(summary)
 
         print("Saving as csv...")
@@ -1477,6 +1479,7 @@ class PerovskiteAnalysis(FiretaskBase):
 
         import os
         root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
+
         my_file = Path(root + '/' + self.dir_name +"/perovskites.pkl")
         if my_file.is_file():
             df_from_file = pd.read_pickle(root + '/' + self.dir_name +"/perovskites.pkl")
