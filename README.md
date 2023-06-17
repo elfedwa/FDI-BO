@@ -53,7 +53,7 @@ copy paste templates to `..python-version/site-packages/fireworks/user_objects/f
 
 `PMG_DEFAULT_FUNCTIONAL: PBE_54`
 
-`PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
+`PMG_VASP_PSP_DIR: ~/vasp_potcar/MY_PSP/`
 
 ## Execution 
 
