@@ -11,7 +11,9 @@
 
 ## Overview
 <a name="overview"></a>
-Bayesian optimization with Faux-data injection loop is illustrated in the figure below: 
+Our work on Bayesian optimization with faux-data injection for target material discovery is presented in [Faux-Data Injection Optimization for Accelerating Data-Driven Discovery of Materials](https://link.springer.com/article/10.1007/s40192-023-00301-x)
+
+It makes use of faux-data injection in Bayesian optimization loop as illustrated in the figure below: 
 
 ![image info](img/bo_loop.png)
 
@@ -21,14 +23,14 @@ To install the required python packages run:
 
 `pip install -r requirements.txt`
 
-Rocketsled is part of this code so no need to install it. 
+Modified version of Rocketsled library is part of this code so no need to install it. 
 
 ## Environment Setup
 <a name="env"></a>
 
 This code requires VASP software, a seperate `run.bash` must be provided based on your VASP's bin location, HPC's configuration and required settings. A sample file is provided.
 
-This code also makes use of MongoDB to store values output for Bayesian Optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`
+This code also makes use of MongoDB to store values output for Bayesian Optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`. If not provided in `defaults.yaml`, the user will be prompted to add in the commandline. 
 
 create conda virtural environment as below:
 
@@ -65,12 +67,18 @@ The computational experiments can be executed by running the following command-l
                        
 ## Citation 
 <a name="cite"></a>
+
 Please cite this work as:
 
-<pre>@article{faux2023
-  title={Faux-Data Injection Optimization for Accelerating
-   Data-Driven Discovery of Materials},
+<pre>@article{ziaullah2023faux,
+  title={Faux-Data Injection Optimization for Accelerating Data-Driven Discovery of Materials},
   author={Ziaullah, Abdul Wahab and Chawla, Sanjay and El-Mellouhi, Fedwa},
   journal={Integrating Materials and Manufacturing Innovation},
+  pages={1--14},
+  year={2023},
   publisher={Springer}
-}</pre>
+}
+</pre>
+
+## DOI
+<pre>https://doi.org/10.1007/s40192-023-00301-x</pre>
