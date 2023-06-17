@@ -32,3 +32,7 @@ batch_size: 1                           # number of new workflows to launch in o
 timeout: 500                            # seconds before resetting the manager
 dir_name: null
 
+#MongoDB URI
+mongodb_uri: null
+
+

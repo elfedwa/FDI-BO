@@ -65,24 +65,13 @@ class OptTask(FireTaskBase):
 
         # Configuration attrs
         lp = self.get("launchpad", LaunchPad.auto_load())
-        # print("LP IS",lp)
         if isinstance(lp, LaunchPad):
             lp = lp.to_dict()
         self.lpad = LaunchPad.from_dict(lp)
         self.opt_label = self.get("opt_label", "opt_default")
-        # print("LP LABEL1",self.lpad)
-
-        # print("LP LABEL2",self.lpad.db)
-        #
-        # # Code!
-        #
 
         self.c = getattr(self.lpad.db, self.opt_label)
-        # print("SELF.C",self.c)
         self.config = self.c.find_one({"doctype": "config"})
-        # print("SELF.CONFIG",self.config)
-        # print("SELF.CONFIG[BATCH_SIZE]",self.config["batch_size"])
-        # exit(0)  # Successful exit
 
         if self.config is None:
             raise NotConfiguredError(
@@ -109,10 +98,6 @@ class OptTask(FireTaskBase):
         
         self.dir_name= self.config["dir_name"]
         self.methodology = self.dir_name.split('_')[0]
-        print("directory name has been passed in task",self.dir_name)
-        print("methodology selected",self.methodology)
-
-        
         self.acq = self.config["acq"]
         self.space_file = self.config["space_file"]
         self.onehot_categorical = self.config["onehot_categorical"]
@@ -212,7 +197,6 @@ class OptTask(FireTaskBase):
                         x, y, z, all_xz_new, n_completed = self.optimize(
                             fw_spec, manager_id
                         )
-                        print("ALL XZ RETURNED IS ",all_xz_new)
                     except BatchNotReadyError:
                         return None
                     except Exception:
@@ -245,7 +229,6 @@ class OptTask(FireTaskBase):
                         split_xz(xz_new, self.x_dims, x_only=True)
                         for xz_new in all_xz_new
                     ]
-                    print("All_X_NEW",all_x_new)
                     if not isinstance(self.wf_creator_args, (list, tuple)):
                         raise TypeError(
                             "wf_creator_args should be a list/tuple of "
@@ -257,17 +240,7 @@ class OptTask(FireTaskBase):
                             "wf_creator_kwargs should be a dictionary of "
                             "keyword arguments."
                         )
-                    if len(all_x_new) >1:
-                        print("NEW BATCH SUGGESTIONS",len(all_x_new),all_x_new)
-                        # for k in range(len(all_x_new)):
-                        #     if k == 0:
-                        #         continue
-                        #     else:
-                        #         all_x_new[k][0]=np.random.uniform(-5, 5)
-                        #         all_x_new[k][1] = np.random.uniform(-5, 5)
-                        # print("FINAL BATCH SUGGESTIONS",all_x_new)
 
-                    # exit(0)
                     new_wfs = [
                         self.wf_creator(
                             x_new, *self.wf_creator_args, **self.wf_creator_kwargs
@@ -351,7 +324,6 @@ class OptTask(FireTaskBase):
         batch_ready = (
             n_completed not in (0, 1) and (n_completed + 1) % self.batch_size == 0
         )
-
         x = convert_native(x)
         y = convert_native(y)
         z = convert_native(z)
@@ -396,7 +368,6 @@ class OptTask(FireTaskBase):
                         },
                     )
             else:
-                print("TIME RIGHT NOW IS, ",time.time())
                 # For new guesses: insert x, y, z, index,
                 # predictor, and dummy new guesses
                 self.c.insert_one(
@@ -432,9 +403,7 @@ class OptTask(FireTaskBase):
         all_xz_searched = [None] * n_completed
         all_xz_searched.append(x + z)
         for i, doc in enumerate(searched_docs):
-            print("FOR I IN DOC",i)
             all_x_searched[i] = doc["x"]
-            print("doc[x",doc["x"])
 
             all_xz_searched[i] = doc["x"] + doc["z"]
             all_y[i] = doc["y"]
@@ -503,44 +472,18 @@ class OptTask(FireTaskBase):
             all_xz_searched_copy=copy.copy(all_xz_searched)
 
 
-            print("test", all_xz_searched_copy)
             ######################################################################
             all_xz_searched_copy = np.reshape(all_xz_searched_copy,
                                               (len(all_xz_searched_copy), 3))
             all_y_copy = copy.copy(all_y)
-            print("BEFOrE all_xz_searched_copy",all_xz_searched_copy)
-            print("ERROR FOR PREDICT 1 ", all_xz_searched_copy, all_y_copy)
+
             ######################################################################
-            # print("test",all_xz_searched_copy)
-            # all_xz_searched_copy=np.reshape(all_xz_searched_copy,
-            #            (len(all_xz_searched_copy), 3))
-            # all_y_copy=copy.copy(all_y)
-            # faux_injection = True
-            # print("THE COPIED VALUES ARE AS FOLLOWS",all_xz_searched_copy)
-            if self.methodology == 'FDI-BO':
-                # r = []
-                # for l in range(len(all_xz_searched_copy)):
-                #     print(l)
-                #     r.append(all_xz_searched_copy[l][:-1])
-                # all_xz_searched_copy = r
-                # print("ERROR",all_xz_searched_copy)
-                # all_xz_searched_copy = np.reshape(all_xz_searched_copy,
-                #                                   (len(all_xz_searched_copy), 2))
-                # print("AFTER all_xz_searched_copy", all_xz_searched_copy)
-                #
-                # all_y_copy = copy.copy(all_y)
-                print("ERROR FOR PREDICT 2",all_xz_searched_copy,all_y_copy)
-            print("THE COPIED VALUES ARE AS FOLLOWS",all_xz_searched_copy)
+           
+    
             all_xz_new_copy=[]
             for _ in iterator_obj:
-                print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN",_)
-                print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN",_)
-                print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN",_)
-
-                print("SEARCHED SPACE",len(all_xz_searched),all_xz_searched)
-                print("VALUES OF Y SECELCTED",len(all_y),all_y)
+            
                 if self.methodology == 'FDI-BO':
-
                     _gpy_copy = GPy.models.gp_regression.GPRegression(np.array(all_xz_searched_copy),
                                                                       np.reshape(all_y_copy,
                                                                                  (len(all_y_copy), 1)),
@@ -552,36 +495,20 @@ class OptTask(FireTaskBase):
                     predictions = predict(
                         all_xz_searched_copy, all_y_copy, all_xz_unsearched, model(*self.predictor_args, **self.predictor_kwargs), self.n_bootstraps
                     )
-                    # predictions= _gpy_copy.predict(np.array(all_xz_unsearched))
                     mu, std = predictions
                     values = acquire(self.acq, np.array(all_y_copy), mu, std)
                     evaluator = max
                     suggestiony=evaluator(values)
-
-
                     index = values.index(suggestiony)
-
-
                     suggestion=all_xz_unsearched[index]
-
-
-                    print("SUGGESTION",np.array(suggestion))
-                    print("SUGGESTION",np.array(suggestion[:-1]))
-
                     ix = all_xz_unsearched.index(suggestion)
                     all_xz_unsearched.pop(ix)
-                    print("CHECK INDEX",index,ix)
                     mu, std = _gpy_copy.predict(np.array(suggestion[:-1]).reshape(1,2))
-                    print("PREDICTIONS ARE THE FOLLOWING",mu)
+                    print("Faux Prediction {} at {} as actual data-point".format(mu,np.array(suggestion[:-1])))
                     all_y_copy=list(all_y_copy)
-
                     all_y_copy.append(mu)
                     all_xz_searched_copy=list(all_xz_searched_copy)
-                    print("BEFORE APPENDING",all_xz_searched_copy)
                     all_xz_searched_copy.append(suggestion)
-                    print("AFTER APPENDING",all_xz_searched_copy)
-
-                    print("CHECK WHY IS THis NOT INGESTING REPEADED VAlueS",all_xz_searched_copy)
                     all_xz_new_copy.append(suggestion)
                     all_xz_new = [
                         self._decode(xz_onehot, xz_dims) for xz_onehot in all_xz_new_copy
@@ -596,71 +523,12 @@ class OptTask(FireTaskBase):
                         self.maximize,
                         scaling=True,
                     )
-                    print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN", xz1h)
-                    print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN", xz1h)
-                    print("THIS IS WHERE THE FAUX INJECTION SHOULD HAPPEN", xz1h)
                     ix = all_xz_unsearched.index(xz1h)
                     all_xz_unsearched.pop(ix)
                     all_xz_new_onehot.append(xz1h)
                     all_xz_new = [
                         self._decode(xz_onehot, xz_dims) for xz_onehot in all_xz_new_onehot
                     ]
-            # print("ALL Y VALUES THAT BE DISCARDED",all_y_copy)
-            # print("ALL X VALUES THAT BE USED",all_xz_searched_copy)
-            ###################################PLOTTIng#############################################################
-            # xx = []
-            # yy = []
-            # xqx = []
-            # yqy = []
-            # kk=[]
-            # kyk=[]
-            # from matplotlib import pyplot as plt
-            #
-            # if self.methodology == 'FDI-BO':
-            #     for i in range(len(all_xz_new)):
-            #         xx.append(all_xz_new[i][0])
-            #         yy.append(all_xz_new[i][1])
-            #     scat1=plt.scatter(xx, yy,marker='x')
-            # else:
-            #     for i in range(len(all_xz_new_onehot)):
-            #         xqx.append(all_xz_new_onehot[i][0])
-            #         yqy.append(all_xz_new_onehot[i][1])
-            #     scat1=plt.scatter(xqx, yqy)
-            #
-            # for i in range(len(all_xz_searched)):
-            #     kk.append(all_xz_searched[i][0])
-            #     kyk.append(all_xz_searched[i][1])
-            # scat2 = plt.scatter(kk, kyk)
-            # plt.xlim([-5, 5])
-            # plt.ylim([-5, 5])
-            # plt.scatter(0, 0, marker="o", s=800, alpha=0.3)
-            # if faux_injection == True:
-            #     plt.title('Faux Injection | Iteration : '+str(len(all_xz_searched)/5))
-            #     plt.legend((scat1, scat2),
-            #                ('Faux Injection', 'Total'),
-            #                scatterpoints=1,
-            #                loc='lower left',
-            #                ncol=3,
-            #                fontsize=8)
-            # else:
-            #     plt.title('Top-k | Iteration : '+str(len(all_xz_searched)/5))
-            #     plt.legend((scat1, scat2),
-            #                ('Top-k', 'Total'),
-            #                scatterpoints=1,
-            #                loc='lower left',
-            #                ncol=3,
-            #                fontsize=8)
-            #
-            #
-            # plt.savefig('/home/Wahab005/PycharmProjects/pythonProject/venv/lib/python3.8/site-packages/rocketsled/examples/plotting3/'+str(len(all_xz_searched)/5)+'.png')
-            #
-            # # plt.show(block=False)
-            # # plt.pause(0.5)
-            # plt.close()
-            ###################################PLOTTIng#############################################################
-            # print("ALL XZ NEW USING BEFORE DECODE",all_xz_new_copy)
-
-            print("ALL XZ NEW USING DECODE",all_xz_new)
         elif self.predictor == "random":
             all_xz_new = random.sample(all_xz_unsearched, self.batch_size)
 
@@ -1062,10 +930,6 @@ class OptTask(FireTaskBase):
             values = values.tolist()
         prediction = evaluator(values)
         index = values.index(prediction)
-        print("THE VALUE FOR INXED IS THIS ",index)
-        print("")
-        print("THE VALUE FOR SPACE IS ", space[index])
-
 
         return space[index]
 
@@ -1089,7 +953,6 @@ class OptTask(FireTaskBase):
         self._n_cats = 0
         self._encoding_info = []
         for i, dim in enumerate(dims):
-            print("cats error i, dim",i, dim)
             if type(dim[0]) in dtypes.others:
                 cats = [0] * len(all_x)
 

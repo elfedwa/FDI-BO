@@ -140,10 +140,8 @@ def ei(fmin, mu, std, xi=0.01):
     vals = np.zeros_like(mu)
     mask = std > 0
     stdm = std[mask]
-    print("fmin",fmin,hasattr(fmin, '__len__'))
     if hasattr(fmin, '__len__'):
         fmin=float(fmin)
-        print("after typecasting",fmin)
     improve = fmin - mu[mask] - xi
 
     vals[mask] = improve * norm.cdf(improve / stdm) + stdm * norm.pdf(improve / stdm)

@@ -10,13 +10,11 @@ JOBID=`sbatch -J $1 $parent_location/run.bash | tee  vasp_aw.log`
 JOBID=`echo $JOBID | awk {'print $4'}`
 
 echo $JOBID
-echo "file_location is = $1"
-
-
-echo "file_location is = $1, $DATE_, $location"
-
+echo "Results will be in: $1"
 
 DATE_=`date '+%H:%M:%S'`
+
+
 echo "$JOBID,'Starting',$DATE_" >> $parent_location/$1/profiling.csv
 
 while true
@@ -24,6 +22,7 @@ do
 
 sleep 1
 
+_ELAPSED=`sacct -j $JOBID --format=Start`
 squeue | grep $JOBID > /dev/null
 
 if [[ $? -ne 0 ]];then
@@ -34,7 +33,8 @@ if [[ $? -ne 0 ]];then
 fi
 
 done
+_FINISHED = `sacct -j $JOBID --format=End`
 DATE_=`date '+%H:%M:%S'`
-echo "$JOBID,'Completed',$DATE_" >> $parent_location/$1/profiling.csv
+echo "$JOBID,'Completed',$DATE_,$_ELAPSED,$_FINISHED" >> $parent_location/$1/profiling.csv
 date
 

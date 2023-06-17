@@ -82,8 +82,6 @@ class PoscarSelInOrgTask(FiretaskBase):
                {'selective_dynamics':[False, False, False], 'velocities':[0.0,0.0,0.0]} )
 
 
-        #print("Writing POSCAR")
-        #print(poscar) 
         poscar.write_file('POSCAR')
 
 
@@ -139,8 +137,7 @@ class PerturbPoscarTask(FiretaskBase):
        poscar = Poscar.from_file('POSCAR')
        dist_to_perturb = 0.40  # Angstrom
        poscar.structure.perturb(dist_to_perturb)
-       #print("Writing POSCAR")
-       #print(poscar) 
+  
        Poscar.write_file(poscar, 'POSCAR')
 
 @explicit_serialize
@@ -412,7 +409,6 @@ class AddMoleculeTask(FiretaskBase):
             org_molecule.translate_sites(list(range(len(org_molecule))), cation_coords_res)
     
         print("Writing POSCAR")
-        print(poscar) 
         #Write POSCAR
         p.structure.sort(key=lambda s: s.species_string)
         p.write_file('POSCAR')
@@ -453,8 +449,7 @@ class SupercellPoscarTask(FiretaskBase):
         poscar.make_supercell([self.A_repeat, self.B_repeat, self.C_repeat])
         poscar = Poscar(poscar)
         poscar.comment= self.comp
-        #print("Writing POSCAR")
-        #print(poscar) 
+
         poscar.write_file("POSCAR")
 
     def _load_params(self, d):
@@ -474,18 +469,14 @@ class MakeCubicCellTask(FiretaskBase):
 
     def run_task(self, fw_spec):
         poscar=Structure.from_file("POSCAR.old")
-        print(poscar) 
         vol = poscar.volume
-        print(vol)
         latticeA = vol ** (1. / 3)
         print("New lattice constants of the cubic is ", latticeA )
         newlattice = [[latticeA, 0., 0.], [0., latticeA, 0.], [0., 0., latticeA]]
         newlattice = Lattice(newlattice)
         poscar.modify_lattice(newlattice)
         poscar = Poscar(poscar)
-
         print("Writing POSCAR")
-        print(poscar) 
         poscar.write_file("POSCAR")
 
 @explicit_serialize
@@ -755,9 +746,7 @@ class MixedCationTask(FiretaskBase):
             self._load_params(self)
         #Specie of cation to remove
         specie_to_remove = self.remove_atom
-        print("specie_to_remove", specie_to_remove)
         organic_molecule_to_add = self.organic_mol
-        print("organic_molecule_to_add", organic_molecule_to_add)
 
         mol_rot_angle = self.angle
         mol_rot_axis = self.axis
@@ -773,16 +762,10 @@ class MixedCationTask(FiretaskBase):
     
         #Store the coordinates of cations before remove
         cation_coords = []
-        # print("p.structure.sites",p.structure.sites)
-        # print("specie_to_remove", specie_to_remove)
 
         for i in range(len(p.structure.sites)):
-            # print("p.structure.sites i ",p.structure.sites)
             if p.structure.sites[i].specie.name == specie_to_remove[0]:
-                # print("p.structure.sites[i].specie.name ",p.structure.sites[i].specie.name )
                 cation_coords += [p.structure.sites[i].coords.tolist() ]
-        # import sys
-        # sys.exit()
 
         #Remove cations
         p.structure.remove_species(specie_to_remove)
@@ -791,25 +774,19 @@ class MixedCationTask(FiretaskBase):
     
         ## Molecule to add instead of the removed cations
         org_moleculeA = self.organic_molecule(organic_molecule_to_add[0])
-        print("org_moleculeA",org_moleculeA)
         org_moleculeB = self.organic_molecule(organic_molecule_to_add[1])
-        print("org_moleculeA",org_moleculeB)
 
         org_moleculeA = org_moleculeA.get_centered_molecule()
         org_moleculeB = org_moleculeB.get_centered_molecule()
         suborg_frac = float(organic_molecule_to_add[2])
-        print("suborg_frac",suborg_frac)
 
     
         #Add molecule
         num_cation_coords = len(cation_coords)
-        print("num_cation_coords",num_cation_coords)
 
         num_subcations = round(num_cation_coords * suborg_frac)
-        print("num_subcations = round(num_cation_coords * suborg_frac)",num_cation_coords,suborg_frac,round(num_cation_coords * suborg_frac))
 
         num_maincations = num_cation_coords - num_subcations
-        print("num_maincations",num_maincations)
 
         for i in range(num_maincations):
              # Set up the alignment 
@@ -882,7 +859,6 @@ class MixedCationTask(FiretaskBase):
 
         #Write POSCAR
         print("Writing POSCAR")
-        print(p) 
         p.write_file('POSCAR')
     
 
@@ -975,7 +951,6 @@ class TheCompCell(object):
         theComp = theComp.replace("GA", "Gua")
         comp_cell = theComp.split("_")
         comp = comp_cell[0]
-        print(comp)
         self.comp = comp
         self.cell = comp_cell[1]
         self.numcell = [int(i) for i in self.cell.split("x")]
@@ -997,10 +972,8 @@ def ImagejCart(a, b, latt, cutoff):
             x = b+latt[i]
             y = b-latt[i]
     if np.linalg.norm(x-a) <= np.linalg.norm(y-a):
-#       print("distance", np.linalg.norm(x-a))
         return [x, np.linalg.norm(x-a)]
     elif np.linalg.norm(y-a) < np.linalg.norm(x-a):
-#       print("distance", np.linalg.norm(y-a))
         return [y, np.linalg.norm(y-a)]
 
 def AvgCoordNum(b_atom, c_atom, contcar, v_cutoff):
@@ -1064,8 +1037,6 @@ def OctDeform(b_atom, c_atom, contcar, v_cutoff, lapa):
         return rot_axis
 
     def OctElong(list,d0):   
-       #print(list)
-       #print("the average is: ")
         sum_de = 0
         for i in range(len(list)):
            sum_de += (list[i]/d0)**2
@@ -1162,7 +1133,6 @@ def OctDeform(b_atom, c_atom, contcar, v_cutoff, lapa):
 #           print("B--C bonds are: ")
 #           print(bc_bonds[0:6])
             points_oct = [ bc_bonds[i][4] for i in range(6) ]
-            print(points_oct)
 #           points = np.array(points_oct)  # your points
             points = points_oct
             volume = ConvexHull(points).volume
@@ -1171,8 +1141,6 @@ def OctDeform(b_atom, c_atom, contcar, v_cutoff, lapa):
             bc_bonds_M_idx = bc_bonds[0:6]
             bc_lengths = [row[2] for row in bc_bonds_M_idx]
             bc_lengths.sort()
-            print("The ratio of bonds beweet the shortest and longest: ")
-            print((bc_lengths[0]/bc_lengths[5]))
             for bc_length in bc_lengths:
                 if bc_length > (radii[b_atom] + radii[c_atom[0]]):
                    print("WARNING: the distance is longer than the anion radii") 
@@ -1271,7 +1239,7 @@ def get_convex_hull(material_composition):
     entries = a.get_entries_in_chemsys(entries_list)
 
     pd = PhaseDiagram(entries)
-    print(pd)
+
 
     plotter = PDPlotter(pd, show_unstable=False)
 
@@ -1287,9 +1255,7 @@ def get_convex_hull(material_composition):
         decomp_data["Uncorrected_CE"].append(e.uncorrected_energy)
         decomp_data["Correction"].append(e.correction)
         decomp_data["Composition"].append(str(e.composition))
-        print(e.composition)
     decomp_df = DataFrame(decomp_data, columns=["Entry", "ComputedEnergy", "Uncorrected_CE", "Correction", "Composition"])
-    print(decomp_df)
 
     data = collections.defaultdict(list)
     for e in entries:
@@ -1303,8 +1269,7 @@ def get_convex_hull(material_composition):
 
     ##print data
     df = DataFrame(data, columns=["Materials ID", "Composition", "Ehull", "CompEnergy", "Decomposition"])
-    ##print(df.to_string())
-    print(df)
+
     return hull
 
 
@@ -1334,16 +1299,12 @@ class PerovskiteAnalysis(FiretaskBase):
         else:
             self._load_params(self)
 
-        # infile = open(self.path_+'POSCAR', 'r')
-        # infile = open('/home/heesoo/high-throughput_wahab/MA-EA-AbdulWAhab/dummy/POSCAR', 'r')
         infile = open('POSCAR', 'r')
 
         firstLine = infile.readline()
-        print(firstLine)
         theComp = firstLine
 
-        # contcar=mg.core.structure.Structure.from_file(self.path_+"CONTCAR")
-        # contcar=mg.core.structure.Structure.from_file("/home/heesoo/high-throughput_wahab/MA-EA-AbdulWAhab/dummy/CONTCAR")
+
         contcar=mg.core.structure.Structure.from_file("CONTCAR")
 
         composition1 = str(contcar.composition)
@@ -1356,8 +1317,7 @@ class PerovskiteAnalysis(FiretaskBase):
      
 
         vasprun = Vasprun("vasprun.xml")
-        # vasprun = Vasprun(self.path_ + "vasprun.xml")
-        # vasprun = Vasprun("/home/heesoo/high-throughput_wahab/MA-EA-AbdulWAhab/dummy/vasprun.xml")
+
         entry = vasprun.get_computed_entry()
 
         # set up matplotlib plot
@@ -1368,21 +1328,15 @@ class PerovskiteAnalysis(FiretaskBase):
             print('theComp is not defiend. entry.composition is stored')
             theComp = entry.composition
 
-        # contcar = mg.core.structure.Structure.from_file("/home/heesoo/high-throughput_wahab/MA-EA-AbdulWAhab/dummy/CONTCAR")
-        # contcar = mg.core.structure.Structure.from_file(self.path_+"CONTCAR")
-
+     
         contcar = mg.core.structure.Structure.from_file("CONTCAR")
 
         lapa = contcar.lattice 
         
         #systemname was gernerated accodring to atoms.inp
         systemname=TheCompCell(theComp)
-        print(systemname.comp)
         mainA = systemname.mainA
-        print(systemname.subA)
         subA = systemname.subA
-        print(systemname.subAfrac)
-        print(systemname.numcell)
         theCell = systemname.cell
         num_of_cell = list(map(int, theCell.split('x')))
         num_of_cell = num_of_cell[0] * num_of_cell[1] * num_of_cell[2]
@@ -1396,13 +1350,11 @@ class PerovskiteAnalysis(FiretaskBase):
         UncorrectedEnergy = entry.uncorrected_energy # (uncooredted total energy ) from DOS
         Correction = entry.correction
         allcomps = re.findall('[A-Z][a-z]*', systemname.comp)
-        print(allcomps)
+
         B_site_atom = allcomps[1]
         C_site_atom = [allcomps[2]]
-        print(("NUM_OF_CELL is ",num_of_cell))
         if num_of_cell == 1:
             if allcomps[2] == allcomps[3]:
-               print((allcomps[0]+allcomps[1]+allcomps[2]+"3"))
                theComp = allcomps[0]+"-"+allcomps[1]+allcomps[2]+"3"
                theComp2 = allcomps[0]+allcomps[1]+allcomps[2]+"3"
             else:
@@ -1456,27 +1408,22 @@ class PerovskiteAnalysis(FiretaskBase):
         sum_file.write(line4+'\n')
         sum_file.write(line5+'  '+'\n')
         sum_file.close()
-        print("TotEng",[UncorrectedEnergy])
-        print("TotEng",float(UncorrectedEnergy))
-        print("TotEng",8*((num_of_mainA)*8+(num_of_subA)*11+4))
+
         total_atoms=8*((num_of_mainA/(num_of_mainA+num_of_subA))*8+(num_of_subA/(num_of_mainA+num_of_subA))*11+4)
-        print("TOTAL ATOMS",total_atoms,UncorrectedEnergy,(UncorrectedEnergy)/total_atoms)
-        # REVISION BY ABDULWAHAB: Total Atoms calculated by supercell * ((number of A1 * 8) + (number of A2 * 11) + 4 ) -> 2*2*2(A1 * 8 + A2 * 11 + 4)
-        print("Converged",[vasprun.converged])
+        # REVISION: Total Atoms calculated by supercell * ((number of A1 * 8) + (number of A2 * 11) + 4 ) -> 2*2*2(A1 * 8 + A2 * 11 + 4)
+        import os
         working_directory=os.getcwd()
         summary = {"Comp":[theComp], "SuperCell":[theCell],\
                    "A1":[mainA], "A2":[subA], "numA1":[num_of_mainA], "numA2":[num_of_subA],\
                     "numAllCat": [num_of_mainA+num_of_subA], "yA2":[float(self.concentration)],"yA2Actual":[num_of_subA/(num_of_mainA+num_of_subA)],"TotalAtoms":[total_atoms],\
-                   "TotEng":[UncorrectedEnergy],"Converged":[vasprun.converged],\
-                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct],"angle":[self.angle],"working_directory":[working_directory],"material_id":[str(theComp)+"_"+str(theCell)+"_"+str(mainA)+"_"+str(num_of_subA/(num_of_mainA+num_of_subA))+"_"+str(total_atoms)+"_"+str(lambda_oct)+"_"+str(sigma_oct)+"_"+str(phi_oct)+"_"+str(self.angle)],"TotEngperAtom": [(UncorrectedEnergy)/total_atoms] }
+                   "TotEng":[UncorrectedEnergy],"TotEngperAtom": [(UncorrectedEnergy)/total_atoms],"Converged":[vasprun.converged],\
+                   "lambda":[lambda_oct], "sigma":[sigma_oct], "tilt":[phi_oct],"angle":[self.angle],"working_directory":[working_directory],"material_id":[str(theComp)+"-"+str(theCell)+"-"+str(mainA)+"-"+str(subA)+"-"+str(num_of_mainA)+"-"+str(self.concentration)+"-"+str(num_of_subA/(num_of_mainA+num_of_subA))+"-"+str(total_atoms)+"-"+str(lambda_oct)+"-"+str(sigma_oct)+"-"+str(phi_oct)+"-"+str(self.angle)] }
         print(summary)
 
         print("Saving as csv...")
 
         df = pd.DataFrame(summary)
         df.index.name='index'
-        print("path to save pickle",self.dir_name+'/perovskites.pkl')
-
         import os
         root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
 
@@ -1524,8 +1471,7 @@ class DeltaEMixfromPickle(FiretaskBase):
             print('Cannot find perovksite.pkl database to calculate the enthlapy of cation mix')
         
         # yA2 = self.concentration
-        yA2 = num_of_subA/(num_of_mainA+num_of_subA)
-        print(df) 
+        yA2 = num_of_subA/(num_of_mainA+num_of_subA) 
         returntest = df['yA2'].mean()
         recentdf = df.iloc[[-1]]
         print("Recent df is...")
@@ -1533,41 +1479,19 @@ class DeltaEMixfromPickle(FiretaskBase):
 
         # Energy of pure perovskites and set their minimum as the reference
         # Comp_A1 = df[(df['yA2'] < (0.0 + 1/df['numAllCat']) ) & (df['Converged']==True)]
+ 
         Comp_A1 = df[(df['yA2'] == 0.0 ) & (df['Converged']==True)]
         """problem above """
-        print("INSIDE MIXCAT, Comp_A1",Comp_A1)
         MinE_A1 = Comp_A1['TotEng'].min()
-        print("INSIDE MIXCAT, MinE_A1",MinE_A1)
-
-        # Comp_A2 = df[(df['yA2'] > (1.0 - 1/df['numAllCat']) ) & (df['Converged']==True)]
         Comp_A2 = df[(df['yA2']== 1.0 ) & (df['Converged']==True)]
-
-        print("INSIDE MIXCAT, Comp_A2",Comp_A2)
-
         MinE_A2 = Comp_A2['TotEng'].min()
-        print("INSIDE MIXCAT, MinE_A2",MinE_A2)
-
         recent_yA2 = df.at[df.index[-1],'yA2']
-        print("INSIDE MIXCAT, recent_yA2", recent_yA2)
-
         enthalpy_comp = df.at[df.index[-1],'TotEng']
-        print("INSIDE MIXCAT, enthalpy_comp", enthalpy_comp)
-
         enthalpy_ref = (MinE_A1 * (1.0 - yA2)) + (MinE_A2 * yA2)
-        print("INSIDE MIXCAT, enthalpy_ref", enthalpy_ref)
-
         enthalpy_mix = (enthalpy_comp - enthalpy_ref)  * 1000    # in eV/FU
-        print("INSIDE MIXCAT, enthalpy_mix", enthalpy_mix)
-
         print("Computed Dleta H_Mix (meV/F.U.): ", enthalpy_mix)
-        
-        #df_Emix = df[['Comp','A1','A2','yA2','TotEng']]
         df_Emix = df.loc[:,('Comp','A1','A2','yA2','TotEng')]
-        print("INSIDE MIXCAT, df_Emix", df_Emix)
-
         df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2']) - MinE_A2 * (df_Emix['yA2'])
-        print("INSIDE MIXCAT, df_Emix['DHmix']", df_Emix['DHmix'])
-
         df_Emix['DHmix_in_meV'] = df_Emix['DHmix'] * 1000      # in meV/FU
         df_Emix.index.name='index'
         df_Emix.to_csv('../DHmix.csv')

@@ -18,18 +18,13 @@ import pandas as pd
 df_vol = pd.read_csv('deform_volume.csv')
 
 
-#contcarfile = "CONTCAR4.vasp"
-#print("CONTCAR file is: ",contcarfile)
-#s1 = Structure.from_file(contcarfile)
 contcar_count = len(fnmatch.filter(os.listdir("."), 'CONTCAR*.vasp'))
 cc = contcar_count
 connum = '{:04d}'.format(cc-1)
 lastfile = "CONTCAR"+connum+".vasp"
 print("Last file is: ",lastfile)
 structures = []
-#structures.append(s1)
-#print(dir(s1[0]))
-#print(dir(s1))
+
 
 def get_mol_structure(s1):
     # Translate the atoms to find 8 molecules
@@ -49,18 +44,13 @@ def get_longdist_pair(mol, N, C):
     longdistpair = []
     for n in Nindx:
         for c in Cindx:
-           #print(n,c)
             CN_dist = mol.get_distance(n,c)
-           #print(CN_dist)
             if CN_dist > longdist:
                 longdist = CN_dist
                 longdistpair = [n,c]
-   #print(longdist)
-   #print(longdistpair)
     vec = mol.sites[longdistpair[1]].coords - mol.sites[longdistpair[0]].coords
     vec_len = np.linalg.norm(vec)
     vec = vec / vec_len
-   #print(vec)
     return (n,c,vec)
 
 
@@ -96,12 +86,10 @@ def get_directions(my_molecules):
     # OP_ref_vec = [0.0, 0.0]
     OPcos = []
     for i in my_molecules:
-        #print (i)
         rdfml = i.composition.reduced_formula
         if rdfml == 'H6CN':
             nc = get_longdist_pair(i,'N','C')
             x, y, z =  nc[2]
-            #print(cart2sph(x,y,z))
             cations.append('MA')
             r, theta, phi = cart2sph(x,y,z)
             r, theta, phi = cartesian_to_spherical(x,y,z)
@@ -113,7 +101,6 @@ def get_directions(my_molecules):
         elif rdfml == 'H8C2N':
             nc = get_longdist_pair(i,'N','C')
             x, y, z =  nc[2]
-            #print(cart2sph(x,y,z))
             cations.append('EA')
             r, theta, phi = cart2sph(x,y,z)
             r, theta, phi = cartesian_to_spherical(x,y,z)
@@ -125,7 +112,6 @@ def get_directions(my_molecules):
         elif rdfml == 'H7C2NF':
             nc = get_longdist_pair(i,'N','F')
             x, y, z =  nc[2]
-            #print(cart2sph(x,y,z))
             cations.append('FEA')
             r, theta, phi = cart2sph(x,y,z)
             r, theta, phi = cartesian_to_spherical(x,y,z)
@@ -139,9 +125,7 @@ def get_directions(my_molecules):
     EA_n = float(len([1 for i in cations if i == 'EA']))
     FEA_n = float(len([1 for i in cations if i == 'FEA']))
     print("MA, EA, FEA: ", MA_n, EA_n, FEA_n)
-    #print(cations)
-    #print(sphcoords_theta)
-    #print(sphcoords_phi)
+
     return [cations,MA_n,EA_n,FEA_n], sphcoords_theta, sphcoords_phi, OPcos
 
 
@@ -208,13 +192,8 @@ print(df)
 print(df.describe())
 #df = df[df['Cation']=='MA']
     
-    
-#print(len(my_molecules))
-#print(dir(my_molecules[0].sites[0].coords))
-#print(my_molecules[0].sites[0].coords)
 
 print(df.describe())
-#df = df[df['Cation']=='MA']
 xticks = [(-1)*m.pi, (-0.5)*m.pi, 0, 0.5*m.pi, m.pi]
 yticks = [(-0.5)*m.pi, 0, 0.5*m.pi]
 ax = df.plot.hexbin(x="Phi", y="Theta", gridsize=20, sharex=False,

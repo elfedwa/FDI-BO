@@ -25,9 +25,10 @@ Rocketsled is part of this code so no need to install it.
 
 ## Environment Setup
 <a name="env"></a>
-Add your corresponding VASP path in `~./bashrc` using the variable `VASP_PATH` such as below:
 
-`export VASP_PATH='lustre/software/vasp/vasp.5.4.4.pl2/bin/'`
+This code requires VASP software, a seperate `run.bash` must be provided based on your VASP's bin location, HPC's configuration and required settings. A sample file is provided.
+
+This code also makes use of MongoDB to store values output for Bayesian Optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`
 
 create conda virtural environment as below:
 
@@ -53,11 +54,7 @@ copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templa
 `PMG_VASP_PSP_DIR: /cray_home/user_name/vasp_potcar/MY_PSP/`
 
 ## Execution 
-<a name="exe"></a>
-The computational experiment is initialized in  `atoms.inp`. So to run computations on  Methylammonium lead halide change with supercell size of `2x2x2` and lattice parameters of `6.30x6.30x6.30` , and initial concentration of `0.275` we add the correseponding line:
-<pre>
- 6.30 6.30 6.30    Methylammonium   Pb I  I      2 2 2  Ethylammonium    0.275
-</pre>
+
 The computational experiments can be executed by running the following command-line, replacing (method) with either **FDI-BO**, 
                        **TOPK-BO**,
                        **S-BO** or

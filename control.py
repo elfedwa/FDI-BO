@@ -271,10 +271,7 @@ class MissionControl:
         self.config = config
         self.dir_name = self.config["dir_name"]
         root = os.getcwd()
-        print("roor in control is ", root)
         self.path_sv = root + '/' + self.dir_name
-        print("control self.path_sv = root + '/' + self.dir_name ", self.path_sv)
-        # print("directory name has been passed in control",self.dir_name)
         if self.c.find_one({"doctype": "config"}):
             raise ValueError(
                 "A config is already present in this Launchpad "
@@ -360,8 +357,6 @@ class MissionControl:
         fxstr = "$f(x)$" if latexify else "f(x)"
         opt = max if maximize else min
         objs = self.c.find_one({"index": {"$exists": 1}})["y"]
-        print("nonetype error",objs)
-
         n_objs = len(objs) if isinstance(objs, (list, tuple)) else 1
         dt = datetime.datetime.now()
         dtdata = [dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second]
@@ -381,8 +376,6 @@ class MissionControl:
             )
         docset = self.c.find({"index": {"$exists": 1}})
         docs = [None] * docset.count()
-        print("DOSCSET>CUNT",docset,docset.count())
-
         for i, doc in enumerate(docset):
             docs[i] = {"y": doc["y"], "index": doc["index"], "x": doc["x"]}
         if n_objs > 1:
@@ -395,8 +388,6 @@ class MissionControl:
             ]
             pareto_i = [i[0] for i in pareto_graph]
 
-        print("Optimization Analysis:")
-        print("Number of objectives: {}".format(n_objs))
 
         for obj in range(n_objs):
             ax = ax_arr[obj % n_cols, int(math.floor(obj / n_cols))]
@@ -522,8 +513,6 @@ class MissionControl:
                 ax.set_title("Objective {}: {}".format(obj + 1, best_label))
             ax.set_yscale(scale)
         plt.gcf().set_size_inches(10, 10)
-        # if summarize:
-        #     print(self.summarize())
 
         if print_pareto and n_objs > 1:
             print(

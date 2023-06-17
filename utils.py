@@ -267,9 +267,20 @@ def get_default_opttask_kwargs():
     with open(fname, "r") as config_raw:
         yaml = YAML()
         conf_dict = dict(yaml.load(config_raw))
-    print("INITIAL CONFIG RED",conf_dict)
     return conf_dict
 
+def save_mongodb_uri():
+    """
+    Save MongoDB uri for future use.
+
+
+    """
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    fname = os.path.join(cwd, "defaults.yaml")
+    with open(fname, "r") as config_raw:
+        yaml = YAML()
+        conf_dict = dict(yaml.load(config_raw))
+    return conf_dict
 
 def check_dims(dims):
     """
@@ -378,7 +389,6 @@ def convert_native(a):
     if isinstance(a, Iterable):
         try:
             # numpy conversion
-            print("native error again",a)
             native = a.tolist()
         except AttributeError:
             native = [None] * len(a)

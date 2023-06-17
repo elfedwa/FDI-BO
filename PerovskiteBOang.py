@@ -1,10 +1,10 @@
 
-__author__ = 'Heesoo Park , Abdul Wahab Ziaullah'
+__author__ = 'Heesoo Park'
 __copyright__ = 'Copyright ---------------------------'
-__version__ = '2'
+__version__ = '0.2'
 __maintainer__ = 'Heesoo Park'
 __email__ = 'heesoo.p@gmail.com'
-__date__ = 'May 30, 2023'
+__date__ = 'Jul 11, 2021'
 
 import matplotlib.pyplot as plt
 from pymatgen.core.structure import Structure
@@ -15,7 +15,6 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from MixCations import SupercellPoscarTask, PoscarSelTask, PoscarSelInOrgTask, PerturbPoscarTask, MixedCationTask
 from MixCations import PerovskiteAnalysis, DeltaEMixfromPickle
 
-# from rocketsled import MissionControl, OptTask
 from task import OptTask
 from control import MissionControl
 from fireworks.utilities.fw_utilities import explicit_serialize
@@ -79,7 +78,6 @@ class DeltaEMixBO(FiretaskBase):
 
         self.dir_name = d['dir_name']
         self.mission_control = d['mission_control']
-        print("parameter_loaded",self.dir_name)
 
 
     def run_task(self, fw_spec):
@@ -109,13 +107,13 @@ class DeltaEMixBO(FiretaskBase):
         
         yA2 = x[0]
         print(df) 
+        returntest = df['yA2'].mean()
         recentdf = df.iloc[[-1]]
         print("Recent df is...")
         print(recentdf)
 
 
         Comp_A1 = df[(df['yA2Actual'] == 0.0 ) & (df['Converged']==True)]
-
         MinE_A1 = Comp_A1['TotEng'].min()
         Comp_A2 = df[(df['yA2Actual']== 1.0 ) & (df['Converged']==True)]
         MinE_A2 = Comp_A2['TotEng'].min()
@@ -123,6 +121,8 @@ class DeltaEMixBO(FiretaskBase):
         enthalpy_comp = df.at[df.index[-1], 'TotEng']
         enthalpy_ref = (MinE_A1 * (1.0 - recent_yA2)) + (MinE_A2 * recent_yA2)
         enthalpy_mix = (enthalpy_comp - enthalpy_ref) * 1000  # in eV
+
+        # df_Emix = df[['Comp','A1','A2','yA2','TotEng']]
         df_Emix = df.loc[:, ('Comp', 'A1', 'A2','numA1','numA2', 'yA2', 'yA2Actual','angle','TotalAtoms','TotEng','TotEngperAtom')]
         df_Emix['DHmix'] = df_Emix['TotEng'] - MinE_A1 * (1.0 - df_Emix['yA2Actual']) - MinE_A2 * (df_Emix['yA2Actual'])
         df_Emix['DHmix_in_meV'] = df_Emix['DHmix'] * 1000      # in meV/
@@ -135,7 +135,9 @@ class DeltaEMixBO(FiretaskBase):
         plt.close()
         y = recent_DHmix
         print("x: ", x)
+        print()
         print("y: ", y)
+       
         return FWAction(update_spec={"_y": y, "_x": x})
 
 
@@ -176,39 +178,37 @@ def wf_creator(x):
     supercell_repeat = rfile[7:10]
     supercell_repeat = list(map(int, supercell_repeat))
     cation_site = atoms[0]
-
     ## Random/BO in atoms.inp: the concetration values are given by the workflow
     if (atoms[5] == "Random") or (atoms[5] == "BO"):
         concentration = x1
         organic_molecule_to_add = atoms[0:5:4] + [concentration]
     else:
         concentration_inp = float(atoms[5])
-        print("In the atoms.inp, {} is given as the concentration of A2".format(concentration_inp))
-        print("The BO method will not use this concentration. But the BO-generated concentration will be used.")
+       #organic_molecule_to_add = atoms[0:5:4] + [concentration]
         concentration = x1
         organic_molecule_to_add = atoms[0:5:4] + [concentration]
     # Cs will be replaced with the organic molecule later. And Cs's coordinates are the center of the molecule.
     atoms[0] = cell_with_Cs(atoms[0])
     atoms[4] = cell_with_Cs(atoms[4])
+
     print('Input lattices, element, and supercell repetition: {}, {}, and {}'\
            .format(lattices, atoms, supercell_repeat))
-    print('Cations to be mixed: ', organic_molecule_to_add)
     vaspinp={'lattices':lattices, 'atoms':atoms, 'cation_site':cation_site, 
                       'organic_cation':organic_molecule_to_add, 'supercell_repeat':supercell_repeat}
-
-
     lattices = vaspinp['lattices']
     atoms = vaspinp['atoms']
     cation_site = vaspinp['cation_site']
     organic_cation = vaspinp['organic_cation']
     supercell_repeat = vaspinp['supercell_repeat']
     concentration = x[0]
+
     pi = 3.1415926535 # the ratio of a circle's circumference to its diameter
     specie_to_remove = ['Cs']
 
     sc_repeat = supercell_repeat
     compound = '{}{}{}2{}_{}x{}x{}_{}{}'.format(SN[organic_cation[0]], atoms[1], atoms[2], atoms[3], 
                sc_repeat[0], sc_repeat[1], sc_repeat[2], SN[organic_cation[1]], concentration)
+
 
 
     poscar_context = {'system': compound,
@@ -235,15 +235,17 @@ def wf_creator(x):
     orgmoltask = MixedCationTask({'remove_atom': specie_to_remove, 'organic_mol': organic_cation,
                        'angle': molalign, 'axis': [1, 1, 1],
                        'center': [0., 0., 0.]})
+
+
     root = os.getcwd()
     if "launcher" in root:
         root = os.path.abspath(os.path.join(os.getcwd(), os.path.pardir))
-    firetask6=ScriptTask.from_str(root+'./check.job '+ global_dir_name)
+
+    firetask6=ScriptTask.from_str(root+'/./check.job '+ global_dir_name)
     firetask7 = ScriptTask.from_str('pwd > where.txt')
+
     firetask_analysis = PerovskiteAnalysis({'concentration':concentration,'angle':molalign,'dir_name':dir_name})
-
-####################################################################################
-
+ 
     fw1 = Firework([firetask1, supercelltask,# perturbtask,
         postask, firetask2, firetask3, firetask5, orgmoltask,
        firetask6, firetask7,
@@ -265,11 +267,9 @@ def wf_creator(x):
 
 
 
-def RunBO(mc_config, numbatch, VC,batch_size,dir_name,molalign=0.0):
+def RunBO(mc_config, iterations_, VC,batch_size,dir_name,mongodb_uri,molalign=0.0):    
     # Configure the optimization db with MissionControl
-    launchpad = LaunchPad(host="mongodb+srv://user:user@cluster0.ahbrsyi.mongodb.net/" +dir_name, uri_mode=True)
-    # launchpad = LaunchPad(name="rsled")
-
+    launchpad = LaunchPad(host='mongodb+srv://'+mongodb_uri+'/'+dir_name, uri_mode=True)
     opt_label = "opt_complex"
     global global_db_info
 
@@ -310,10 +310,9 @@ def RunBO(mc_config, numbatch, VC,batch_size,dir_name,molalign=0.0):
 
     # Sets high-thoughtpu VASP
     concentration = x_dim[0]
-    print("concentration",concentration)
     BO_input = x_dim[1][0]
-    print("BO_input",x_dim[1][0])
     # This below line sets the input for BO instead of reading atoms.inp file    
+    #BO_input = sys.argv[1]
     rfile = BO_input.split()
     lattices = rfile[0:3]
     lattices = list(map(float, lattices))
@@ -335,37 +334,26 @@ def RunBO(mc_config, numbatch, VC,batch_size,dir_name,molalign=0.0):
     atoms[4] = cell_with_Cs(atoms[4])   
     print('Input lattices, element, and supercell repetition: {}, {}, and {}'\
            .format(lattices, atoms, supercell_repeat))
-    print('Cations to be mixed: ', organic_molecule_to_add)
     wf_creator_input={'lattices':lattices, 'atoms':atoms, 'cation_site':cation_site, 
                       'organic_cation':organic_molecule_to_add, 'supercell_repeat':supercell_repeat}
 
-    # Run 30 workflows + optimization
-    print("printing range",range(batch_size))
     if batch_size>1:
         for bs in range(batch_size):
-            print("bs",bs)
             launchpad.add_wf(wf_creator([concentration, BO_input, random.random(),dir_name,db_info,mc]))
     else:
         launchpad.add_wf(wf_creator([concentration, BO_input, molalign,dir_name,db_info,mc]))
 
-    print("NUMBER OF LAUNCHES THAT WIll HAPPeN IS",numbatch,batch_size)
-    print("TESTING TRUTH CONDITION",str(dir_name.split('_')[0]) , 'FDI-BO', 'FDI-BO'==str(dir_name.split('_')[0]))
     if str(dir_name.split('_')[0]) == 'FDI-BO':
-        print("launching multiprocess",dir_name.split('_')[0],batch_size,numbatch)
-
-        launch_multiprocess(launchpad,FWorker(),nlaunches=(numbatch*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
+        print("launching multiprocess")
+        launch_multiprocess(launchpad,FWorker(),nlaunches=(iterations_*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
     elif str(dir_name.split('_')[0]) == 'TOPK-BO':
-        print("launching multiprocess",dir_name.split('_')[0],batch_size,numbatch)
-
-        launch_multiprocess(launchpad,FWorker(),nlaunches=(numbatch*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
+        print("launching multiprocess")
+        launch_multiprocess(launchpad,FWorker(),nlaunches=(iterations_*batch_size*3), sleep_time=0, loglvl="CRITICAL",num_jobs=batch_size)
     else:
-        print("launching single",dir_name.split('_')[0],batch_size,numbatch)
-
-        rapidfire(launchpad, nlaunches=(numbatch * batch_size * 3), sleep_time=0)
-
+        print("launching single process")
+        rapidfire(launchpad, nlaunches=(iterations_ * batch_size * 3), sleep_time=0)
     # Examine and plot the optimization
     plt = mc.plot(print_pareto=True)
-#   plt.show()
     import os
     root = os.getcwd()
     path_sv = root + '/' + dir_name + "/bayesian_optimization.pdf"
