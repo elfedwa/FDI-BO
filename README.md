@@ -28,7 +28,7 @@ Modified version of Rocketsled library is part of this code so no need to instal
 ## Environment Setup
 <a name="env"></a>
 
-This code requires VASP software, a seperate `run.bash` must be provided based on your VASP's bin location, HPC's configuration and required settings. A sample file is provided.
+This code submits SLURM job to run propritary DFT software, [VASP](https://www.vasp.at/). A seperate `run.bash` must be provided based on your VASP's location, HPC's configuration and other parameters. A sample file is provided which can be replaced based on your setup. 
 
 This code also makes use of MongoDB to store values output for Bayesian Optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`. If not provided in `defaults.yaml`, the user will be prompted to add in the commandline. 
 
@@ -61,6 +61,12 @@ The computational experiments can be executed by running the following command-l
                        **TOPK-BO**,
                        **S-BO** or
                        **random** 
+
+`python BOang-HT-vasp.py (method)`
+
+e.g: `python BOang-HT-vasp.py FDI-BO`
+
+To run with no-hangup:
 
 `python BOang-HT-vasp.py (method) </dev/null> name.log 2>1 & disown -h "$!"`
 
