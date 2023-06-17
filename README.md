@@ -43,9 +43,9 @@ create conda virtural environment as below:
 
 copy/paste fireworks template writer files to current fireworks directory
 
-copy paste POTCAR FOLDER -> `/cray_home/user_name/vasp_potcar/MY_PSP`
+copy paste POTCAR FOLDER -> `~/vasp_potcar/MY_PSP`
 
-copy paste templates to `~/site-packages/fireworks/user_objects/firetasks/templates`
+copy paste templates to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
 
 `gedit ~/.pmgrc.yaml`
 
