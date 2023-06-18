@@ -32,11 +32,17 @@ Create Conda Environment as follows:
 
 `conda activate fdibo_env`
 
-Copy/paste fireworks template writer files to current fireworks directory
+## Installation
+<a name="installation"></a>
+Once the virtual environment is active, install the required python packages: 
 
-Copy/paste POTCAR folder -> `~/vasp_potcar/MY_PSP`
+`pip install -r requirements.txt`
 
-Copy/paste templates to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
+Modified version of Rocketsled library is part of this code so no need to install it. 
+
+Copy/paste `POTCAR` folder -> `~/vasp_potcar/MY_PSP`
+
+Copy/paste `templates` to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
 
 `gedit ~/.pmgrc.yaml`
 
@@ -46,13 +52,6 @@ Copy/paste templates to `..python-version/site-packages/fireworks/user_objects/f
 
 `PMG_VASP_PSP_DIR: ~/vasp_potcar/MY_PSP/`
 
-## Installation
-<a name="installation"></a>
-Once the virtual environment is active, install the required python packages: 
-
-`pip install -r requirements.txt`
-
-Modified version of Rocketsled library is part of this code so no need to install it. 
 
 ## Execution 
 
