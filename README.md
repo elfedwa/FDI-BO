@@ -85,4 +85,4 @@ Please cite this work as:
 </pre>
 
 ## DOI
-<pre>https://doi.org/10.1007/s40192-023-00301-x</pre>
+https://doi.org/10.1007/s40192-023-00301-x
