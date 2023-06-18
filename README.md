@@ -3,10 +3,10 @@
 
 
 1. [Overview](#overview)
-2. [Installation](#installation)
-3. [Environment Setup](#env)
-3. [Execution](#exe)
-4. [Citation](#cite)
+2. [Environment Setup](#env)
+3. [Installation](#installation)
+4. [Execution](#exe)
+5. [Citation](#cite)
 
 
 ## Overview
@@ -17,35 +17,26 @@ It makes use of faux-data injection in Bayesian optimization loop as illustrated
 
 ![image info](img/bo_loop.png)
 
-## Installation
-<a name="installation"></a>
-To install the required python packages run: 
-
-`pip install -r requirements.txt`
-
-Modified version of Rocketsled library is part of this code so no need to install it. 
-
 ## Environment Setup
 <a name="env"></a>
 
-This code submits SLURM job to run propritary DFT software, [VASP](https://www.vasp.at/). A seperate `run.bash` must be provided based on your VASP's location, HPC's configuration and other parameters. A sample file is provided which can be replaced based on your setup. 
+This code submits SLURM jobs to run propritary DFT software, [VASP](https://www.vasp.at/). A seperate `run.bash` must be provided based on your VASP's location, HPC's configuration and other parameters. A sample `run.bash` file is provided which can be replaced based on your setup. 
 
-This code also makes use of MongoDB to store values output for Bayesian Optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`. If not provided in `defaults.yaml`, the user will be prompted to add in the commandline. 
+This code also makes use of MongoDB to store values from Bayesian optimization, a MongoDB URI can be provided in `defaults.yaml` as `mongodb_uri:`. You can add your URI e.g `username:password@cluster0.abcdefg.mongodb.net`. If not provided in `defaults.yaml`, the user will be prompted to add in the command-line. 
 
-create conda virtural environment as below:
+Create Conda Environment as follows:
 
 `conda create -n fdibo_env python==3.6`
 
 `conda config --append channels conda-forge`
 
 `conda activate fdibo_env`
-<a name="installation"></a>
 
-copy/paste fireworks template writer files to current fireworks directory
+Copy/paste fireworks template writer files to current fireworks directory
 
-copy paste POTCAR FOLDER -> `~/vasp_potcar/MY_PSP`
+Copy/paste POTCAR folder -> `~/vasp_potcar/MY_PSP`
 
-copy paste templates to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
+Copy/paste templates to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
 
 `gedit ~/.pmgrc.yaml`
 
@@ -55,9 +46,17 @@ copy paste templates to `..python-version/site-packages/fireworks/user_objects/f
 
 `PMG_VASP_PSP_DIR: ~/vasp_potcar/MY_PSP/`
 
+## Installation
+<a name="installation"></a>
+To install the required python packages run: 
+
+`pip install -r requirements.txt`
+
+Modified version of Rocketsled library is part of this code so no need to install it. 
+
 ## Execution 
 
-The computational experiments can be executed by running the following command-line, replacing (method) with either **FDI-BO**, 
+The computational experiments can be executed by running the following command in the terminal, replacing (method) with either **FDI-BO**, 
                        **TOPK-BO**,
                        **S-BO** or
                        **random** 
