@@ -40,9 +40,9 @@ Once the virtual environment is active, install the required python packages:
 
 Modified version of Rocketsled library is part of this code so no need to install it. 
 
-Copy/paste `POTCAR` folder -> `~/vasp_potcar/MY_PSP`
+Copy/paste `POTCAR` folder to `~/vasp_potcar/MY_PSP`
 
-Copy/paste `templates` to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
+Copy/paste `templates` folder to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
 
 `gedit ~/.pmgrc.yaml`
 
