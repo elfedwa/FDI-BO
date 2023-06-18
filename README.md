@@ -48,7 +48,7 @@ Copy/paste templates to `..python-version/site-packages/fireworks/user_objects/f
 
 ## Installation
 <a name="installation"></a>
-To install the required python packages run: 
+Once the virtual environment is active, install the required python packages: 
 
 `pip install -r requirements.txt`
 
