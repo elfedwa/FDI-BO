@@ -3,7 +3,7 @@ __author__ = 'Heesoo Park, Abdul Wahab Ziaullah'
 __copyright__ = 'Copyright ---------------------------'
 __version__ = '0.3'
 __maintainer__ = 'Heesoo Park, Abdul Wahab Ziaullah'
-__email__ = 'heesoo.p@gmail.com, awahab@hbku.edu.qa'
+__email__ = 'heesoo.p@gmail.com, w.a.h.a.b@windowslive.com'
 __date__ = 'Jan 15, 2023'
 
 
