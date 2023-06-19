@@ -1,4 +1,4 @@
-## Faux data Injection Bayesian Optimization
+## Faux-Data Injection Optimization for Accelerating Data-Driven Discovery of Materials
 ## Table of Contents
 
 
