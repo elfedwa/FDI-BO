@@ -42,7 +42,7 @@ Modified version of Rocketsled library is part of this code so no need to instal
 
 Copy/paste `vasp_potcar` folder to home directory `~/vasp_potcar`
 
-Copy/paste `templates` folder to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
+Copy/replace `templates` folder to `..python-version/site-packages/fireworks/user_objects/firetasks/templates`
 
 `gedit ~/.pmgrc.yaml`
 
