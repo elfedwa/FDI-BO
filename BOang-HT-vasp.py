@@ -46,6 +46,8 @@ def get_dir_name(method,perovskite_):
     shutil.copy2(path1,path3)
     shutil.copy2(path2,path3)
     return dir_name,atoms
+
+
 if __name__ == "__main__":
     n =len(sys.argv)
     if n > 1:
